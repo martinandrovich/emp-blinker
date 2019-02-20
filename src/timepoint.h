@@ -25,5 +25,5 @@ typedef struct
 
 } TIMEPOINT;
 
-extern TIMEPOINT * new_TIMEPOINT(UINT32U clock_freq, UINT32U systick_dur);
-void TIMEPOINT * del_TIMEPOINT(TIMEPOINT * tp );
+extern  TIMEPOINT * new_TIMEPOINT(UINT32U clock_freq, UINT32U systick_dur);
+void    TIMEPOINT * del_TIMEPOINT(TIMEPOINT * tp );
