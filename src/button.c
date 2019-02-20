@@ -46,15 +46,15 @@ void BUTTON_handler_button(BUTTON * this)
     {
 
       case KEY_UP:
-        this->m_is_key_down(this);
+        this->is_key_down(this);
       break;
 
       case DEBOUNCING:
-        this->m_debounce_button(this);
+        this->debounce_button(this);
       break;
 
       case KEY_DOWN:
-        this->m_key_down(this);
+        this->key_down(this);
       break;
 
       default:
@@ -133,21 +133,21 @@ BUTTON* new_button()
 *   Function : Constructor for Button.
 ****************************************************************************/
 {
-    BUTTON* p = malloc(sizeof(BUTTON));
-    p->m_handler_button = &BUTTON_handler_button;
-    p->m_is_key_down = &BUTTON_is_key_down;
-    p->m_debounce_button = &BUTTON_debounce_button;
-    p->m_key_down = &BUTTON_key_down;
-    return p;
+    BUTTON* this = malloc(sizeof(BUTTON));
+    this->handler_button = &BUTTON_handler_button;
+    this->is_key_down = &BUTTON_is_key_down;
+    this->debounce_button = &BUTTON_debounce_button;
+    this->key_down = &BUTTON_key_down;
+    return this;
 };
 
-void del_button(BUTTON* p)
+void del_button(BUTTON* this)
 /****************************************************************************
 *   Input    : Pointer to Button object
 *   Function : Destructor for object
 ****************************************************************************/
 {
-    free(p);
+    free(this);
 };
 
 /****************************** End Of Module *******************************/
