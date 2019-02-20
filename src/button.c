@@ -27,11 +27,16 @@
 
 /*****************************   Constants   *******************************/
 
+/*************************  Function interfaces ****************************/
+void is_key_down(BUTTON * this);
+void debounce_button(BUTTON * this);
+void key_down(BUTTON * this );
+BUTTON* new_button();
+void del_button(BUTTON* this);
+
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
-
-
 
 void BUTTON_handler_button(BUTTON * this)
 /****************************************************************************
@@ -40,35 +45,32 @@ void BUTTON_handler_button(BUTTON * this)
 ****************************************************************************/
 {
     int int_systick_flag = 1; //quick fix
-  if(int_systick_flag == 1)
-  {
-    switch (this->state)
+    if(int_systick_flag == 1)
     {
-
-      case KEY_UP:
-        this->is_key_down(this);
-      break;
-
-      case DEBOUNCING:
-        this->debounce_button(this);
-      break;
-
-      case KEY_DOWN:
-        this->key_down(this);
-      break;
-
-      default:
-        this->state = KEY_UP;
-      break;
-
-    }
-  }
-
-  return;
+        switch (this->state)
+        {
+              case KEY_UP:
+                    is_key_down(this);
+              break;
+              /*            ---             */
+              case DEBOUNCING:
+                    debounce_button(this);
+              break;
+              /*            ---             */
+              case KEY_DOWN:
+                    key_down(this);
+              break;
+              /*            ---             */
+              default:
+                    this->state = KEY_UP;
+              break;
+         }
+     }
+return;
 };
 
 
-void BUTTON_is_key_down(BUTTON * this)
+void is_key_down(BUTTON * this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate if btn pressed
@@ -82,7 +84,7 @@ void BUTTON_is_key_down(BUTTON * this)
   return;
 }
 
-void BUTTON_debounce_button(BUTTON * this)
+void debounce_button(BUTTON * this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate debounce_state
@@ -112,7 +114,7 @@ void BUTTON_debounce_button(BUTTON * this)
 }
 
 
-void BUTTON_key_down(BUTTON * this )
+void key_down(BUTTON * this )
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, pick mode
@@ -120,8 +122,6 @@ void BUTTON_key_down(BUTTON * this )
 {
   if( GPIO_PORTF_DATA_R & (1 << SW1) )
   {
-
-
 
   }
 }
@@ -135,9 +135,6 @@ BUTTON* new_button()
 {
     BUTTON* this = malloc(sizeof(BUTTON));
     this->handler_button = &BUTTON_handler_button;
-    this->is_key_down = &BUTTON_is_key_down;
-    this->debounce_button = &BUTTON_debounce_button;
-    this->key_down = &BUTTON_key_down;
     return this;
 };
 

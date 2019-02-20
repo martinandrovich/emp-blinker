@@ -1,62 +1,72 @@
-#include "emp_type.h"
-#include "timepoint.h"
-#include "stdlib.h"
-/*
- * button.h
- *
- *  Created on: Feb 20, 2019
- *      Author:
- */
+/****************************************************************************
+* University of Southern Denmark
+* Embedded Programming (EMP)
+*
+* MODULENAME.: timepoint.c
+*
+* PROJECT....: emp-blinker
+*
+* DESCRIPTION: See module specification file (.h-file).
+*
+* Change Log:
+*****************************************************************************
+* Date    Id    Change
+* YYMMDD
+* --------------------
+* 190220  MA    Module created.
+*
+****************************************************************************/
 
 #pragma once
 
+/***************************** Include files *******************************/
+
+#include "emp_type.h"
+#include "timepoint.h"
+#include "stdlib.h"
+
+/*****************************    Defines    *******************************/
 
 typedef struct BUTTON BUTTON;
 
-extern void del_button();
+/*****************************   Constants   *******************************/
+
+/*****************************   Variables   *******************************/
+
+/*****************************   Functions   *******************************/
+
+/********************** External declaration of Variables ******************/
+
+/*****************************   Constants   *******************************/
+
+/*************************  Function interfaces ****************************/
+
 extern void handler_button (BUTTON*);
-extern void button_isr (void);
 extern BUTTON* new_button();
 
 
+/*****************************    Constructs   *****************************/
+
 ENUM KEYSTATE
 {
-   KEY_UP        = 0,
-   DEBOUNCING    = 1,
-   KEY_DOWN      = 2
+   KEY_UP        =  0,
+   DEBOUNCING    =  1,
+   KEY_DOWN      =  2
 };
 
+/*****************************   MAIN STRUCT   *****************************/
 
 struct BUTTON
 {
-    //
-    //
-    KEYSTATE e_state;
 
-    //
-    //
+    ENUM KEYSTATE state;
     TIMEPOINT tp_pressed;
+    INT16U duration;
 
-    //
-    //
-    INT16U i_duration;
+/*****************************   PUBLIC FUNCT  *****************************/
 
-    //
-    //
     void(*handler_button)(BUTTON*);
 
-    //
-    //
-    void(*is_key_down)(BUTTON*);
-
-    //
-    //
-    void(*debounce_button)(BUTTON*);
-
-    //
-    //
-    void(*key_down)(BUTTON*);
-
-
-
 };
+
+/****************************** End Of Module ******************************/
