@@ -13,14 +13,17 @@ typedef struct
 
     INT32U unit_ns;
 
-    void tick(/* arguments */)
+    void tick()
     {
-        // add unit_ns to current counters
+        ;
     };
 
     INTU16 delta_ms(TIMEPOINT * tp)
     {
-        /* code */
+        ;
     };
 
 } TIMEPOINT;
+
+extern TIMEPOINT * new_TIMEPOINT(UINT32U clock_freq, UINT32U systick_dur);
+void TIMEPOINT * del_TIMEPOINT(TIMEPOINT * tp );
