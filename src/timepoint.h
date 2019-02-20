@@ -65,7 +65,7 @@ struct TIMEPOINT
 
     /** Methods ************************************************************/
     void(*tick)(TIMEPOINT * self);
-    INTU16(*delta_ms)(TIMEPOINT * tp1, TIMEPOINT * tp2);
+    INT16U(*delta_ms)(TIMEPOINT * tp1, TIMEPOINT * tp2);
 };
 
 /****************************** End Of Module ******************************/

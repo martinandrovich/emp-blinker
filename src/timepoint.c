@@ -39,7 +39,7 @@ void        TIMEPOINT_tick(TIMEPOINT * self)
     ;
 }
 
-INTU16      TIMEPOINT_delta_ms(TIMEPOINT * tp1, TIMEPOINT * tp2)
+INT16U      TIMEPOINT_delta_ms(TIMEPOINT * tp1, TIMEPOINT * tp2)
 /****************************************************************************
 *   Input    : Pointer to self(tp1) and other(tp2) TIMEPOINT instance.
 *   Output   : Unsigned integer
