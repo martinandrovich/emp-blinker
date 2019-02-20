@@ -42,7 +42,7 @@ extern  TIMEPOINT * new_TIMEPOINT(INT32U systick_dur_ns);
 *   Function : Constructor of a TIMEPOINT instance.
 ****************************************************************************/
 
-extern  void        del_TIMEPOINT(TIMEPOINT * tp );
+extern  void        del_TIMEPOINT(TIMEPOINT * tp);
 /****************************************************************************
 *   Input    : Pointer to a TIMEPOINT instance.
 *   Output   : -

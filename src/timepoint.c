@@ -29,7 +29,7 @@
 
 /*****************************   Functions   *******************************/
 
-void TIMEPOINT_increment(TIMEPOINT * this, INT16U value, INT8U unit)
+void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, INT8U unit)
 /****************************************************************************
 *   Input    : this = pointer to TIMEPOINT instance
                value = ammount to increment (unit defined by index)
@@ -115,7 +115,7 @@ TIMEPOINT * new_TIMEPOINT(INT32U systick_dur_ns)
     return tp;
 };
 
-void del_TIMEPOINT(TIMEPOINT * tp )
+void del_TIMEPOINT(TIMEPOINT * tp)
 /****************************************************************************
 *   Function : See module specification (.h-file).
 *****************************************************************************/
