@@ -19,6 +19,7 @@
 
 /***************************** Include files *******************************/
 #include "button.h"
+#include "stdint.h"
 #include "tm4c123gh6pm.h"
 /*****************************    Defines    *******************************/
 #define SW1 4
@@ -32,12 +33,13 @@
 
 
 
-void m_handler_button (BUTTON* this)
+void BUTTON_handler_button(BUTTON * this)
 /****************************************************************************
 *   Input    : Object this pointer, this is a method
 *   Function : Finite State Machine determines, which state for button to be in
 ****************************************************************************/
 {
+    int int_systick_flag = 1; //quick fix
   if(int_systick_flag == 1)
   {
     switch (this->state)
@@ -66,7 +68,7 @@ void m_handler_button (BUTTON* this)
 };
 
 
-void (*m_is_key_down)(BUTTON* );
+void BUTTON_is_key_down(BUTTON * this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate if btn pressed
@@ -80,7 +82,7 @@ void (*m_is_key_down)(BUTTON* );
   return;
 }
 
-void (*m_debounce_button)(BUTTON* );
+void BUTTON_debounce_button(BUTTON * this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate debounce_state
@@ -110,7 +112,7 @@ void (*m_debounce_button)(BUTTON* );
 }
 
 
-void (*m_key_down)(BUTTON* );
+void BUTTON_key_down(BUTTON * this )
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, pick mode
@@ -132,12 +134,10 @@ BUTTON* new_button()
 ****************************************************************************/
 {
     BUTTON* p = malloc(sizeof(BUTTON));
-    p->debounced = 0;
-    p->duration = 0;
-    p->m_handler_button = &m_handler_button;
-    p->m_is_key_down = &m_is_key_down;
-    p->m_debounce_button = &m_debounce_button;
-    p->m_key_down = &m_key_down;
+    p->m_handler_button = &BUTTON_handler_button;
+    p->m_is_key_down = &BUTTON_is_key_down;
+    p->m_debounce_button = &BUTTON_debounce_button;
+    p->m_key_down = &BUTTON_key_down;
     return p;
 };
 
