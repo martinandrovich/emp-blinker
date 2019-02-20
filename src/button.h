@@ -9,5 +9,12 @@
 #define BUTTON_H_
 
 
+typedef struct
+{
+    bool debounced = false;
+    bool key
+
+} button;
+
 
 #endif /* BUTTON_H_ */
