@@ -29,7 +29,7 @@
 
 /*****************************   Functions   *******************************/
 
-void TIMEPOINT_increment(TIMEPOINT * this, INT16U value, INT8U index)
+void TIMEPOINT_increment(TIMEPOINT * this, INT16U value, INT8U unit)
 /****************************************************************************
 *   Input    : this = pointer to TIMEPOINT instance
                value = ammount to increment (unit defined by index)
@@ -42,15 +42,15 @@ void TIMEPOINT_increment(TIMEPOINT * this, INT16U value, INT8U index)
     // CPP Version
     // https://gist.github.com/martinandrovich/17615f282af047c953e0d776b218e603
 
-	this->time_array[index] += value;
+	this->time_array[unit] += value;
 
-	INT16U remainder = this->time_array[index] % 1000;
-	INT16U quotient	= this->time_array[index] / 1000;
+	INT16U remainder = this->time_array[unit] % 1000;
+	INT16U quotient	= this->time_array[unit] / 1000;
 
-	if (remainder != this->time_array[index]) // OR quotient > 1 ????
+	if (remainder != this->time_array[unit]) // OR quotient > 1 ????
 	{
-		this->time_array[index] = remainder;
-        TIMEPOINT_increment(this, quotient, index + 1);
+		this->time_array[unit] = remainder;
+        TIMEPOINT_increment(this, quotient, unit + 1);
 	}
 
     return;
@@ -63,8 +63,20 @@ void TIMEPOINT_tick(TIMEPOINT * this)
 *   Function : Increment TIMEPOINT with a systick unit.
 ****************************************************************************/
 {
-    TIMEPOINT_increment(this, this->increment_ns, 0);
+    TIMEPOINT_increment(this, this->systick_dur_ns, ns);
     return;
+}
+
+INT64U TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, INT8U unit)
+/****************************************************************************
+*   Input    : tp1, tp2 = Pointers to TIMEPOINT instances.
+               unit = TIMEUNIT to be used
+*   Output   : Unsigned integer
+*   Function : Calculate absolute delta duration between two TIMEPOINTs
+               given in unit defined by TIMEUNIT.
+****************************************************************************/
+{
+    return 0;
 }
 
 INT16U TIMEPOINT_delta_ms(TIMEPOINT * tp1, TIMEPOINT * tp2)
@@ -75,10 +87,10 @@ INT16U TIMEPOINT_delta_ms(TIMEPOINT * tp1, TIMEPOINT * tp2)
                given in ms.
 ****************************************************************************/
 {
-    ;
+    return 0;
 }
 
-TIMEPOINT * new_TIMEPOINT(INT32U clock_freq, INT32U systick_dur)
+TIMEPOINT * new_TIMEPOINT(INT32U systick_dur_ns)
 /****************************************************************************
 *   Function : See module specification (.h-file).
 *****************************************************************************/
@@ -92,11 +104,12 @@ TIMEPOINT * new_TIMEPOINT(INT32U clock_freq, INT32U systick_dur)
         tp->time_array[i] = 0;
     }
 
-    // set increment value
-    tp->increment_ns    = 0;
+    // set increment value given in ns
+    tp->systick_dur_ns  = systick_dur_ns;
 
     // link function pointers
     tp->tick            = &TIMEPOINT_tick;
+    tp->delta           = &TIMEPOINT_delta;
     tp->delta_ms        = &TIMEPOINT_delta_ms;
 
     return tp;

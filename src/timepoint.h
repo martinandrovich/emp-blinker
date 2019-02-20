@@ -34,7 +34,7 @@ typedef struct TIMEPOINT TIMEPOINT;
 
 /*************************  Function interfaces ****************************/
 
-extern  TIMEPOINT * new_TIMEPOINT(INT32U clock_freq, INT32U systick_dur);
+extern  TIMEPOINT * new_TIMEPOINT(INT32U systick_dur_ns);
 /****************************************************************************
 *   Input    : clock_freq   = Clock frequency of the MIC given in Hz.
 *              systick_dur  = Duration of a systick timer tick given in ns.
@@ -51,24 +51,27 @@ extern  void        del_TIMEPOINT(TIMEPOINT * tp );
 
 /*****************************    Constructs   *****************************/
 
+enum TIMEUNIT
+{
+    ns,     // 0 = nanoseconds
+    us,     // 1 = microseconds
+    ms,     // 2 = milliseconds
+    s       // 3 = seconds
+};
+
 struct TIMEPOINT
 {
     /** Members ************************************************************/
 
 
-    INT16U time_array[4];   // indexes 0: ns, 1: us, 2: ms, 3: s
-    INT32U increment_ns;
-
-    // INT16U hours;
-    // INT16U minutes;
-    // INT16U seconds;
-    // INT16U milliseconds;
-    // INT16U microseconds;
-    // INT16U nanoseconds;
+    INT64U time_array[4];   // indexes 0: ns, 1: us, 2: ms, 3: s
+    INT64U systick_dur_ns;
 
     /** Methods ************************************************************/
     void(*tick)(TIMEPOINT * this);
+    INT64U(*delta)(TIMEPOINT * tp1, TIMEPOINT * tp2, INT8U unit);
     INT16U(*delta_ms)(TIMEPOINT * tp1, TIMEPOINT * tp2);
+
 };
 
 /****************************** End Of Module ******************************/
