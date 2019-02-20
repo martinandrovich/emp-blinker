@@ -54,17 +54,20 @@ extern  void        del_TIMEPOINT(TIMEPOINT * tp );
 struct TIMEPOINT
 {
     /** Members ************************************************************/
-    INT32U unit_ns;
 
-    INT16U hours;
-    INT16U minutes;
-    INT16U seconds;
-    INT16U milliseconds;
-    INT16U microseconds;
-    INT16U nanoseconds;
+
+    INT16U time_array[4];   // indexes 0: ns, 1: us, 2: ms, 3: s
+    INT32U increment_ns;
+
+    // INT16U hours;
+    // INT16U minutes;
+    // INT16U seconds;
+    // INT16U milliseconds;
+    // INT16U microseconds;
+    // INT16U nanoseconds;
 
     /** Methods ************************************************************/
-    void(*tick)(TIMEPOINT * self);
+    void(*tick)(TIMEPOINT * this);
     INT16U(*delta_ms)(TIMEPOINT * tp1, TIMEPOINT * tp2);
 };
 
