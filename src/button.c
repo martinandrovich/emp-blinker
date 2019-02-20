@@ -19,122 +19,135 @@
 
 /***************************** Include files *******************************/
 #include "button.h"
+#include "tm4c123gh6pm.h"
 /*****************************    Defines    *******************************/
+#define SW1 4
+#define DEBOUNCE_MIN 20
 
 /*****************************   Constants   *******************************/
-
-static BOOLEAN SW1_TRIGGER = NULL;
 
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
-void button_isr (void) // interrupt service routine
-{
-    /* some static variable
-      static BOOLEAN SW1_TRIGGER = true;
-    */
-};
 
-int get_isr (BUTTON* this) // interrupt service routine
-{
-    //get static variable
-    return 1;
-};
 
-void handler_button (BUTTON* this)
+
+void m_handler_button (BUTTON* this)
+/****************************************************************************
+*   Input    : Object this pointer, this is a method
+*   Function : Finite State Machine determines, which state for button to be in
+****************************************************************************/
 {
-    if (this->get_isr = TRUE)
+  if(int_systick_flag == 1)
+  {
+    switch (this->state)
     {
-      switch(this->state)
-        {/*
-          case NO_STATE:
 
-            this->debounced = false;
+      case KEY_UP:
+        this->m_is_key_down(this);
+      break;
 
-            this->state = KEY_DOWN;
+      case DEBOUNCING:
+        this->m_debounce_button(this);
+      break;
 
-            this->tp_pressed = (get_time_Stamp)
+      case KEY_DOWN:
+        this->m_key_down(this);
+      break;
 
-            break;
+      default:
+        this->state = KEY_UP;
+      break;
 
-            case KEY_DOWN:
-
-            this is debouncing
-
-            uint32 DIFFERENCE = getCurrentTimeStamp - this->tp_pressed;
-
-            *if (difference >= DEBOUNCE)
-            {
-            this->debounced=true;
-
-            }
-
-            break;
-
-            case KEY_UP:
-
-
-
-            break;
-
-            case KEY_PRESSED:
-                // code here
-                break;
-          */
-        }
-
-
-
-    //disable interrupt for button;
-    //init debouncing
     }
+  }
 
-    return;
+  return;
 };
+
+
+void (*m_is_key_down)(BUTTON* );
+/****************************************************************************
+*   Output   : Object
+*   Function : Method for m_handler_button, calculate if btn pressed
+****************************************************************************/
+{
+  if(GPIO_PORTF_DATA_R & (1 << SW1))
+  {
+      this->state = DEBOUNCING;
+      /* this->tp_pressed = tp_global; */
+  }
+  return;
+}
+
+void (*m_debounce_button)(BUTTON* );
+/****************************************************************************
+*   Output   : Object
+*   Function : Method for m_handler_button, calculate debounce_state
+****************************************************************************/
+{
+
+  if( GPIO_PORTF_DATA_R & (1 << SW1) )
+  {
+    /*
+    if(TIMEPOINT_delta_ms(tp_global,this->tp_pressed) >= DEBOUNCE_MIN)
+    {
+      this->state = KEY_DOWN;
+    }
+    else
+    {
+      this->state = DEBOUNCING;
+    }
+    */
+  }
+  else
+  {
+    this->state = KEY_UP;
+  };
+
+  return;
+
+}
+
+
+void (*m_key_down)(BUTTON* );
+/****************************************************************************
+*   Output   : Object
+*   Function : Method for m_handler_button, pick mode
+****************************************************************************/
+{
+  if( GPIO_PORTF_DATA_R & (1 << SW1) )
+  {
+
+
+
+  }
+}
+
 
 BUTTON* new_button()
+/****************************************************************************
+*   Output   : Object
+*   Function : Constructor for Button.
+****************************************************************************/
 {
     BUTTON* p = malloc(sizeof(BUTTON));
     p->debounced = 0;
     p->duration = 0;
-    p->handler_button = &handler_button;
-    p->get_isr = &get_isr;
+    p->m_handler_button = &m_handler_button;
+    p->m_is_key_down = &m_is_key_down;
+    p->m_debounce_button = &m_debounce_button;
+    p->m_key_down = &m_key_down;
     return p;
 };
 
 void del_button(BUTTON* p)
+/****************************************************************************
+*   Input    : Pointer to Button object
+*   Function : Destructor for object
+****************************************************************************/
 {
     free(p);
 };
 
-
-/*void test1(void)
-/*****************************************************************************
-*   Input    :
-*   Output   :
-*   Function :
-******************************************************************************/
-/*{
-  dummy1++;
-}*/
-
-/*  extern void test2(void)
-/*****************************************************************************
-*   Function : See module specification (.h-file).
-*****************************************************************************/
-/*{
-  dummy2++;
-}*/
-
 /****************************** End Of Module *******************************/
-
-
-
-
-
-
-
-
-
-
-

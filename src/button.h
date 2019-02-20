@@ -21,22 +21,41 @@ extern BUTTON* new_button();
 
 struct BUTTON
 {
+    //
+    //
     ENUM KEYSTATE
     {
-       NO_STATE    = 0,
-       KEY_DOWN    = 1,
-       KEY_UP      = 2,
-       KEY_PRESSED = 3
+       KEY_UP    = 0,
+       DEBOUNCING    = 1,
+       KEY_DOWN      = 2
     } state;
 
-    BOOLEAN debounced;
-
+    //
+    //
     TIMEPOINT tp_pressed;
 
-    INT16U duration;
+    //
+    //
+    INT16U i_duration;
 
-    void (*debouncing_button)(BUTTON*);
-    void (*handler_button)(BUTTON*);
-    int (*get_isr)(BUTTON*);
+    //
+    //
+    void (*m_handler_button)(BUTTON* );
+
+    //
+    //
+    void (*m_is_key_down)(BUTTON* );
+
+
+    //
+    //
+    void (*m_debounce_button)(BUTTON* );
+
+
+    //
+    //
+    void (*m_key_down)(BUTTON* );
+
+
+
 };
-
