@@ -1,11 +1,12 @@
 #pragma once
 
+#include <stdlib.h>
 #include "emp_type.h"
 
 typedef struct
 {
     INT16U hours;
-    INT16U hours;
+    INT16U minutes;
     INT16U seconds;
     INT16U milliseconds;
     INT16U microseconds;
@@ -13,17 +14,19 @@ typedef struct
 
     INT32U unit_ns;
 
-    void tick()
-    {
-        ;
-    };
-
-    INTU16 delta_ms(TIMEPOINT * tp)
-    {
-        ;
-    };
+    // Update timepoint with a systick unit.
+    // void tick()
+    // {
+    //     ;
+    // };
+    //
+    // // Get difference between two timepoints; return integer.
+    // INTU16 delta_ms(TIMEPOINT * tp)
+    // {
+    //     ;
+    // };
 
 } TIMEPOINT;
 
-extern  TIMEPOINT * new_TIMEPOINT(UINT32U clock_freq, UINT32U systick_dur);
-void    TIMEPOINT * del_TIMEPOINT(TIMEPOINT * tp );
+extern  TIMEPOINT * new_TIMEPOINT(INT32U clock_freq, INT32U systick_dur);
+extern  void        del_TIMEPOINT(TIMEPOINT * tp );
