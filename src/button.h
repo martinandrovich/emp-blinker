@@ -1,3 +1,6 @@
+#include "emp_type.h"
+#include "timepoint.h"
+#include "stdlib.h"
 /*
  * button.h
  *
@@ -5,16 +8,27 @@
  *      Author:
  */
 
-#ifndef BUTTON_H_
-#define BUTTON_H_
+#pragma once
 
 
 typedef struct
 {
-    bool debounced = false;
-    bool key
+    ENUM KEYSTATE
+    {
+     KEY_DOWN    = 0,
+     KEY_UP      = 1,
+     KEY_PRESSED = 2
+    } state;
 
-} button;
+    BOOLEAN debounced;
+    TIMEPOINT tp_pressed;
+    INT16U duration;
+
+} BUTTON;
+
+extern BUTTON* new_button();
+extern void del_button();
+extern void handler_button ();
+extern void button_isr (void);
 
 
-#endif /* BUTTON_H_ */

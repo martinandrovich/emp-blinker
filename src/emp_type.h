@@ -25,7 +25,7 @@
 #define NULL 0
 #define FALSE 0
 #define TRUE 1
-
+#define ENUM enum
 
 typedef unsigned char           BOOLEAN;
 typedef unsigned char           INT8U;     /* Unsigned  8 bit quantity              */
