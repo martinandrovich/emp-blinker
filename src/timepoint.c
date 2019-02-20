@@ -90,7 +90,7 @@ INT16U TIMEPOINT_delta_ms(TIMEPOINT * tp1, TIMEPOINT * tp2)
     return 0;
 }
 
-TIMEPOINT * new_TIMEPOINT(INT32U systick_dur_ns)
+TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns)
 /****************************************************************************
 *   Function : See module specification (.h-file).
 *****************************************************************************/

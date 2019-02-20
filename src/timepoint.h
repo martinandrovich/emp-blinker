@@ -34,10 +34,9 @@ typedef struct TIMEPOINT TIMEPOINT;
 
 /*************************  Function interfaces ****************************/
 
-extern  TIMEPOINT * new_TIMEPOINT(INT32U systick_dur_ns);
+extern  TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns);
 /****************************************************************************
-*   Input    : clock_freq   = Clock frequency of the MIC given in Hz.
-*              systick_dur  = Duration of a systick timer tick given in ns.
+*   Input    : systick_dur_ns  = Duration of a SysTimer tick given in ns.
 *   Output   : Pointer to a new TIMEPOINT instance.
 *   Function : Constructor of a TIMEPOINT instance.
 ****************************************************************************/
