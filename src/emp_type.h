@@ -22,6 +22,8 @@
 /***************************** Include files *******************************/
 
 /*****************************    Defines    *******************************/
+#define NULL 0
+
 
 typedef unsigned char           BOOLEAN;
 typedef unsigned char           INT8U;     /* Unsigned  8 bit quantity              */
