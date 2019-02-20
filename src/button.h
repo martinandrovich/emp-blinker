@@ -2,7 +2,7 @@
 * University of Southern Denmark
 * Embedded Programming (EMP)
 *
-* MODULENAME.: timepoint.c
+* MODULENAME.: button.c
 *
 * PROJECT....: emp-blinker
 *
@@ -13,7 +13,7 @@
 * Date    Id    Change
 * YYMMDD
 * --------------------
-* 190220  MA    Module created.
+* 190220  DT    Module created.
 *
 ****************************************************************************/
 
