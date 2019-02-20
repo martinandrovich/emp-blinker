@@ -1,5 +1,10 @@
 #include "timepoint.h"
 
+void TIMEPOINT_tick(TIMEPOINT *self)
+{
+    ;
+};
+
 TIMEPOINT * new_TIMEPOINT(INT32U clock_freq, INT32U systick_dur)
 {
     // allocate object
@@ -12,6 +17,8 @@ TIMEPOINT * new_TIMEPOINT(INT32U clock_freq, INT32U systick_dur)
     tp->milliseconds    = 0;
     tp->microseconds    = 0;
     tp->nanoseconds     = 0;
+
+    tp->tick = &TIMEPOINT_tick;
 
     return tp;
 };

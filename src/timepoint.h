@@ -3,7 +3,10 @@
 #include <stdlib.h>
 #include "emp_type.h"
 
-typedef struct
+extern  void TIMEPOINT_tick();
+typedef struct TIMEPOINT TIMEPOINT;
+
+struct TIMEPOINT
 {
     INT16U hours;
     INT16U minutes;
@@ -15,18 +18,15 @@ typedef struct
     INT32U unit_ns;
 
     // Update timepoint with a systick unit.
-    // void tick()
-    // {
-    //     ;
-    // };
-    //
-    // // Get difference between two timepoints; return integer.
+    void(*tick)(TIMEPOINT *self);
+
+    // Get difference between two timepoints; return integer.
     // INTU16 delta_ms(TIMEPOINT * tp)
     // {
     //     ;
     // };
 
-} TIMEPOINT;
+};
 
 extern  TIMEPOINT * new_TIMEPOINT(INT32U clock_freq, INT32U systick_dur);
 extern  void        del_TIMEPOINT(TIMEPOINT * tp );
