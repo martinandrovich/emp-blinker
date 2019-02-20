@@ -19,16 +19,19 @@ extern void button_isr (void);
 extern BUTTON* new_button();
 
 
+ENUM KEYSTATE
+{
+   KEY_UP        = 0,
+   DEBOUNCING    = 1,
+   KEY_DOWN      = 2
+};
+
+
 struct BUTTON
 {
     //
     //
-    ENUM KEYSTATE
-    {
-       KEY_UP    = 0,
-       DEBOUNCING    = 1,
-       KEY_DOWN      = 2
-    } state;
+    KEYSTATE e_state;
 
     //
     //
@@ -40,21 +43,19 @@ struct BUTTON
 
     //
     //
-    void (*m_handler_button)(BUTTON* );
+    void(*handler_button)(BUTTON*);
 
     //
     //
-    void (*m_is_key_down)(BUTTON* );
-
-
-    //
-    //
-    void (*m_debounce_button)(BUTTON* );
-
+    void(*is_key_down)(BUTTON*);
 
     //
     //
-    void (*m_key_down)(BUTTON* );
+    void(*debounce_button)(BUTTON*);
+
+    //
+    //
+    void(*key_down)(BUTTON*);
 
 
 
