@@ -11,24 +11,32 @@
 #pragma once
 
 
-typedef struct
+typedef struct BUTTON BUTTON;
+
+extern void del_button();
+extern void handler_button (BUTTON*);
+extern void button_isr (void);
+extern BUTTON* new_button();
+
+
+struct BUTTON
 {
     ENUM KEYSTATE
     {
-     KEY_DOWN    = 0,
-     KEY_UP      = 1,
-     KEY_PRESSED = 2
+       NO_STATE    = 0,
+       KEY_DOWN    = 1,
+       KEY_UP      = 2,
+       KEY_PRESSED = 3
     } state;
 
     BOOLEAN debounced;
+
     TIMEPOINT tp_pressed;
+
     INT16U duration;
 
-} BUTTON;
-
-extern BUTTON* new_button();
-extern void del_button();
-extern void handler_button ();
-extern void button_isr (void);
-
+    void (*debouncing_button)(BUTTON*);
+    void (*handler_button)(BUTTON*);
+    int (*get_isr)(BUTTON*);
+};
 
