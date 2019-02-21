@@ -25,6 +25,7 @@
 #define FALSE 0
 #define TRUE 1
 #define ENUM enum
+#define NULLPTR ((void *)0)
 
 typedef void(*FUNPTR)();
 
