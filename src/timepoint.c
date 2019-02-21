@@ -35,6 +35,7 @@ void 	TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)());
 void 	TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
 void 	TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit);
 INT64U 	TIMEPOINT_get_value(TIMEPOINT * this, TIMEUNIT unit);
+INT64U 	TIMEPOINT_set_value(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
 
 void 	TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src);
 INT64U 	TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
@@ -113,6 +114,16 @@ INT64U TIMEPOINT_get_value(TIMEPOINT * this, TIMEUNIT unit)
 	return (sum_ns * pow(10, -3 * unit));
 }
 
+INT64U TIMEPOINT_set_value(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE])
+{
+	
+	for (int idx = 0; idx < TIME_ARRAY_SIZE; idx++)
+	{
+		this->time_array[idx] = time_array[idx];
+	}
+	
+}
+
 void TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src)
 /****************************************************************************
 *   Function : See module specification (.h-file).
@@ -130,7 +141,10 @@ INT64U TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit)
 *   Function : See module specification (.h-file).
 *****************************************************************************/
 {
-    return 0;
+	INT64U tp1_ns = tp1->get_value(tp1, ns);
+	INT64U tp2_ns = tp2->get_value(tp2, ns);
+	INT64U tp_diff = (tp1_ns >= tp2_ns) ? tp1_ns - tp2_ns : tp2_ns - tp1_ns;
+	return (tp_diff * pow(10, -3 * unit));
 }
 
 /***********************   Constructive Functions   ************************/
@@ -164,12 +178,13 @@ TIMEPOINT * new_TIMEPOINT(TP_TYPE type)
 	tp->set_callback	= (type == SYSTEM) ? &TIMEPOINT_set_callback 	: NULL;
 	tp->set_systick		= (type == SYSTEM) ? &TIMEPOINT_set_systick 	: NULL;
 	tp->get_value		= &TIMEPOINT_get_value;
+	tp->set_value		= &TIMEPOINT_set_value;
 
 	// maybe better to set all funcptr to their according func, and perform
 	// error handling in the function, according to TIMEPOINT type?
 
 	//tp->copy			= &TIMEPOINT_copy;
-    //tp->delta           = &TIMEPOINT_delta;
+    tp->delta           = &TIMEPOINT_delta;
     //tp->delta_ms        = &TIMEPOINT_delta_ms;
 
 	// return pointer to instance

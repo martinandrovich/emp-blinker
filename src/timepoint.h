@@ -97,9 +97,10 @@ struct TIMEPOINT
     void    (*tick)(TIMEPOINT * this);
     void    (*set_callback)(TIMEPOINT * this, void(*callback)());
     void    (*set_systick)(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
+	void    (*set_value)(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
     INT64U  (*get_value)(TIMEPOINT * this, TIMEUNIT unit);
     // void(*copy)(TIMEPOINT * this, TIMEPOINT * other);
-    // INT64U(*delta)(TIMEPOINT * this, TIMEPOINT * other, TIMEUNIT unit);
+    INT64U(*delta)(TIMEPOINT * this, TIMEPOINT * other, TIMEUNIT unit);
     // INT16U(*delta_ms)(TIMEPOINT * this, TIMEPOINT * other);
 };
 
