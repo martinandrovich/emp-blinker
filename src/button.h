@@ -69,7 +69,7 @@ struct BUTTON
 {
 
     ENUM KEYSTATE state;
-    TIMEPOINT tp_pressed;
+    TIMEPOINT tp_pressed; //change to pointer
     INT16U duration_ms;
     INT8U button;
 
