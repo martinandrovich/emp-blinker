@@ -33,10 +33,14 @@ void 	TIMEPOINT_increment(TIMEPOINT * this, INT64U value, INT8U unit);
 void 	TIMEPOINT_tick(TIMEPOINT * this);
 void 	TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)());
 void 	TIMEPOINT_set_systick(TIMEPOINT * this, INT64U systick_dur_ns);
+
 void 	TIMEPOINT_copy(TIMEPOINT * this, TIMEPOINT * other);
 INT64U 	TIMEPOINT_delta(TIMEPOINT * this, TIMEPOINT * other, INT8U unit);
 INT16U 	TIMEPOINT_delta_ms(TIMEPOINT * this, TIMEPOINT * other);
 
+TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns);
+void del_TIMEPOINT(TIMEPOINT * this);
+	
 /*****************************   Functions   *******************************/
 
 void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, INT8U unit)
@@ -72,7 +76,7 @@ void TIMEPOINT_tick(TIMEPOINT * this)
 	TIMEPOINT_increment(this, this->systick_dur_ns, ns);
 
 	// call callback if defined
-	if (this->callback != NULL)
+	if (this->callback != NULLPTR)
 	{
 		this->callback();
 	}
@@ -152,7 +156,7 @@ TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns)
     }
 
 	// initialize callback to nullptr
-	tp->callback = NULL;
+	tp->callback = NULLPTR;
 
     // set increment value given in ns
     tp->systick_dur_ns  = systick_dur_ns;
