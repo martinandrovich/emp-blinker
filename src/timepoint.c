@@ -44,8 +44,8 @@ void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, INT8U unit)
 
 	this->time_array[unit] += value;
 
-	INT16U remainder = this->time_array[unit] % 1000;
-	INT16U quotient	= this->time_array[unit] / 1000;
+	INT64U remainder = this->time_array[unit] % 1000;
+	INT64U quotient	= this->time_array[unit] / 1000;
 
 	if (remainder != this->time_array[unit]) // OR quotient > 1 ????
 	{
