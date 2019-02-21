@@ -44,7 +44,6 @@ extern TIMEPOINT * tp_global;
 
 /*************************  Function interfaces ****************************/
 
-extern void BUTTON_controller (BUTTON*);
 extern BUTTON* new_BUTTON(int SW);
 extern void del_BUTTON(BUTTON*);
 
@@ -67,16 +66,16 @@ ENUM BUTTONS
 
 struct BUTTON
 {
-
+    /** Members ************************************************************/
     ENUM KEYSTATE state;
-    TIMEPOINT tp_pressed; //change to pointer
-    INT16U duration_ms;
+    TIMEPOINT * tp_pressed;
+    INT64U duration_ms;
     INT8U button;
 
-/*****************************   PUBLIC FUNCT  *****************************/
-
-    void(*callback)();
-    void(*BUTTON_controller)(BUTTON*);
+    /** Methods ************************************************************/
+    void (*callback)();
+    void (*controller)(BUTTON * this);
+    void (*set_callback)(BUTTON * this, void(*callback)(INT64U _duration_ms));
 
 };
 

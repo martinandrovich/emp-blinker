@@ -26,24 +26,25 @@
 #define DEBOUNCE_MIN    0
 #define NS              0
 #define SW1_INT         30
-#define button_bit      this->button
+#define BUTTON_BIT      this->button
 
 /*****************************   typedef   *********************************/
 
 /*************************  Function declaration ***************************/
-void BUTTON_is_key_down(BUTTON*);
-void BUTTON_debounce_button(BUTTON*);
-void BUTTON_key_down(BUTTON*);
-void BUTTON_init_hardware(BUTTON*);
+void BUTTON_is_key_down(BUTTON *);
+void BUTTON_debounce_button(BUTTON *);
+void BUTTON_key_down(BUTTON *);
+void BUTTON_init_hardware(BUTTON *);
+void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_ms));
 
 BUTTON* new_BUTTON(int);
-void del_BUTTON(BUTTON*);
+void del_BUTTON(BUTTON *);
 
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
 
-void BUTTON_controller(BUTTON* this)
+void BUTTON_controller(BUTTON * this)
 /****************************************************************************
 *   Input    : Object this pointer, this is a method
 *   Function : Finite State Machine determines, which state for button to be in
@@ -64,80 +65,79 @@ void BUTTON_controller(BUTTON* this)
           break;
           /*            ---             */
           default:
-                this->state  =  KEY_UP;
+                this->state = KEY_UP;
           break;
      }
-
-     return;
 };
 
-void BUTTON_is_key_down(BUTTON* this)
+void BUTTON_is_key_down(BUTTON * this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate if btn pressed
 ****************************************************************************/
 {
-
-    if( GPIO_PORTF_DATA_R & (1 << button_bit) ) //if btn pressed then
+    if( GPIO_PORTF_DATA_R & (1 << BUTTON_BIT) ) //if btn pressed then
     {
-        this->state         =   DEBOUNCING;
-        //this->tp_pressed = new_TIMEPOINT(INT64U systick_dur_ns)
-        //this->tp_pressed->copy(*(this->pressed), tp_global);
+        this->state = DEBOUNCING;
+        // construct object
+        if (this->tp_pressed == NULLPTR)
+        {
+            this->tp_pressed = new_TIMEPOINT(NORMAL);
+        }
+        //
+        TIMEPOINT_copy(this->tp_pressed, tp_global);
     }
-
-    return;
 }
 
-void BUTTON_debounce_button(BUTTON* this)
+void BUTTON_debounce_button(BUTTON * this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate debounce_state
 ****************************************************************************/
 {
-
-    if( GPIO_PORTF_DATA_R & (1 << button_bit) ) //if btn pressed then
+    if( GPIO_PORTF_DATA_R & (1 << BUTTON_BIT) ) //if btn pressed then
     {
-        if(this->tp_pressed.delta_ms(tp_global, &(this->tp_pressed)) >= DEBOUNCE_MIN)
+        if(TIMEPOINT_delta(this->tp_pressed, tp_global, ms) >= DEBOUNCE_MIN)
         {
-            this->state     =   KEY_DOWN;
+            this->state = KEY_DOWN;
         }
         else
         {
-            this->state     =   DEBOUNCING;
+            this->state = DEBOUNCING;
         };
     }                                             //else go to begin state
     else
     {
-        this->state         =   KEY_UP;
+        this->state = KEY_UP;
     };
-
-    return;
 }
 
 
-void BUTTON_key_down(BUTTON* this )
+void BUTTON_key_down(BUTTON * this )
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, pick mode
 ****************************************************************************/
 {
-
-    if((GPIO_PORTF_DATA_R & (1 << button_bit)) == FALSE )
+    if((GPIO_PORTF_DATA_R & (1 << BUTTON_BIT)) == FALSE )
     {
 
-        this->duration_ms       =   this->tp_pressed.delta_ms(tp_global, &(this->tp_pressed));
-
-        this->state             =   KEY_UP;
-
-        /*
-        if(this->callback != NULL)
+        this->duration_ms  = TIMEPOINT_delta(this->tp_pressed, tp_global, ms);
+        this->state        = KEY_UP;
+        if(this->callback != NULLPTR)
         {
-
-        }
-        */
+            this->callback(this->duration_ms);
+        };
     }
+}
 
-    return;
+void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_ms))
+/****************************************************************************
+*   Output   : Object is input
+*   Function : Method for m_handler_button, pick mode
+****************************************************************************/
+{
+    this->callback = callback;
 }
 
 
@@ -149,18 +149,20 @@ BUTTON* new_BUTTON(int SW)
 {
     BUTTON* this                =   malloc(sizeof(BUTTON));
 
-    this->BUTTON_controller     =   &BUTTON_controller;
-
     this->duration_ms           =   0;
     this->state                 =   KEY_UP;
     this->button                =   SW;
+    this->tp_pressed            =   NULLPTR;
+
+    this->controller            =   &BUTTON_controller;
+    this->callback              =   &BUTTON_set_callback;
 
     BUTTON_init_hardware(this);
 
     return this;
 }
 
-void del_BUTTON(BUTTON* this)
+void del_BUTTON(BUTTON * this)
 /****************************************************************************
 *   Input    : Pointer to Button object
 *   Function : Destructor for object
@@ -169,7 +171,7 @@ void del_BUTTON(BUTTON* this)
     free(this);
 };
 
-void BUTTON_init_hardware(BUTTON* this)
+void BUTTON_init_hardware(BUTTON * this)
 /****************************************************************************
 *   Input    : input this Button and Parameter
 *   Function : Setup Hardware
@@ -185,10 +187,10 @@ void BUTTON_init_hardware(BUTTON* this)
             );
 
     // PORTF Direction for Button
-    GPIO_PORTF_DIR_R            &=  (0 << button_bit);
+    GPIO_PORTF_DIR_R            &=  (0 << BUTTON_BIT);
 
     // PORF Pull UP - Active Low
-    GPIO_PORTF_PUR_R            |=  (1 << button_bit);
+    GPIO_PORTF_PUR_R            |=  (1 << BUTTON_BIT);
 
     // 0 = Edge, 1 = Level - Interrupt Sense
     // GPIO_PORTF_IS_R    &=  (0 << SW); unused
@@ -213,8 +215,6 @@ void BUTTON_init_hardware(BUTTON* this)
 
     // Enable interrupt on PORTF
     // NVIC_EN0_R |= (1 << SW1_INT); //Enable interrupt
-
-
 };
 
 /****************************** End Of Module *******************************/
