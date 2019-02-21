@@ -24,12 +24,11 @@ void ISR_SYSTICK(void)
 }
 
 /*******************************   Main   **********************************/
-
 int main(void)
 {
 
     // Initialize global timepoint instance
     tp_global = new_TIMEPOINT(200);
 
-	return 0;
 }
+
