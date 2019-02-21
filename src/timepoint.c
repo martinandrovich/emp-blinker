@@ -19,6 +19,7 @@
 
 /***************************** Include files *******************************/
 
+#include <math.h>
 #include "timepoint.h"
 
 /*****************************    Defines    *******************************/
@@ -29,21 +30,20 @@
 
 /************************  Function declarations ***************************/
 
-void 	TIMEPOINT_increment(TIMEPOINT * this, INT64U value, INT8U unit);
 void 	TIMEPOINT_tick(TIMEPOINT * this);
 void 	TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)());
-void 	TIMEPOINT_set_systick(TIMEPOINT * this, INT64U systick_dur_ns);
+void 	TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
+void 	TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit);
 
-void 	TIMEPOINT_copy(TIMEPOINT * this, TIMEPOINT * other);
-INT64U 	TIMEPOINT_delta(TIMEPOINT * this, TIMEPOINT * other, INT8U unit);
-INT16U 	TIMEPOINT_delta_ms(TIMEPOINT * this, TIMEPOINT * other);
+void 	TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src);
+INT64U 	TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
 
-TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns);
-void del_TIMEPOINT(TIMEPOINT * this);
-	
+TIMEPOINT * new_TIMEPOINT(TP_TYPE type);
+void 		del_TIMEPOINT(TIMEPOINT * this);
+
 /*****************************   Functions   *******************************/
 
-void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, INT8U unit)
+void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit)
 /****************************************************************************
 *   Input    : this = pointer to TIMEPOINT instance.
                value = ammount to increment (unit defined by index).
@@ -76,7 +76,7 @@ void TIMEPOINT_tick(TIMEPOINT * this)
 	TIMEPOINT_increment(this, this->systick_dur_ns, ns);
 
 	// call callback if defined
-	if (this->callback != NULLPTR)
+	if (this->callback != NULL)
 	{
 		this->callback();
 	}
@@ -92,55 +92,39 @@ void TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)())
 	this->callback = callback;
 }
 
-void TIMEPOINT_set_systick(TIMEPOINT * this, INT64U systick_dur_ns)
+void TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TIMEUNIT unit)
 /****************************************************************************
 *   Input    : this: Pointer to TIMEPOINT instance.
 			   systick_dur_ns: Duration of systick tick in ns.
 *   Function : Set the systick_dur_ns of a TIMEPOINT instance.
 ****************************************************************************/
 {
-	this->systick_dur_ns = systick_dur_ns;
+	this->systick_dur_ns = duration * pow(10, 3*unit);
 }
 
-void TIMEPOINT_copy(TIMEPOINT * this, TIMEPOINT * other)
+void TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src)
 /****************************************************************************
-*   Input    : this, other = Pointers to TIMEPOINT instances.
-*   Function : Copy time_array from other TIMEPOINT to this TIMEPOINT.
-****************************************************************************/
+*   Function : See module specification (.h-file).
+*****************************************************************************/
 {
-	// copy time_array
+	// copy time_array from source to destination
 	for (int i = 0; i < TIME_ARRAY_SIZE; i++)
 	{
-		this->time_array[i] = other->time_array[i];
+		des->time_array[i] = src->time_array[i];
 	}
 }
 
-INT64U TIMEPOINT_delta(TIMEPOINT * this, TIMEPOINT * other, INT8U unit)
+INT64U TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit)
 /****************************************************************************
-*   Input    : this, other = Pointers to TIMEPOINT instances.
-               unit = TIMEUNIT to be used.
-*   Output   : Unsigned integer.
-*   Function : Calculate absolute delta duration between two TIMEPOINTs
-               given in unit defined by TIMEUNIT.
-****************************************************************************/
-{
-    return 0;
-}
-
-INT16U TIMEPOINT_delta_ms(TIMEPOINT * this, TIMEPOINT * other)
-/****************************************************************************
-*   Input    : this, other = Pointers to TIMEPOINT instances.
-*   Output   : Unsigned integer.
-*   Function : Calculate absolute delta duration between two TIMEPOINTs
-               given in ms.
-****************************************************************************/
+*   Function : See module specification (.h-file).
+*****************************************************************************/
 {
     return 0;
 }
 
 /***********************   Constructive Functions   ************************/
 
-TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns)
+TIMEPOINT * new_TIMEPOINT(TP_TYPE type)
 /****************************************************************************
 *   Function : See module specification (.h-file).
 *****************************************************************************/
@@ -156,19 +140,25 @@ TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns)
     }
 
 	// initialize callback to nullptr
-	tp->callback = NULLPTR;
+	tp->callback = NULL;
 
-    // set increment value given in ns
-    tp->systick_dur_ns  = systick_dur_ns;
-	//tp->type			= SYSTEM;
+    // set systick duration according to TIMEPOINT type  (default = 100ns)
+    tp->systick_dur_ns  = (type == SYSTEM) ? 100 : 0;
 
-    // link function pointers
-    tp->tick            = &TIMEPOINT_tick;
-	tp->set_callback	= &TIMEPOINT_set_callback;
-	tp->set_systick		= &TIMEPOINT_set_systick;
-	tp->copy			= &TIMEPOINT_copy;
-    tp->delta           = &TIMEPOINT_delta;
-    tp->delta_ms        = &TIMEPOINT_delta_ms;
+	// set timepoint type
+	tp->type			= type;
+
+    // link function pointers according to TIMEPOINT type
+    tp->tick            = (type == SYSTEM) ? &TIMEPOINT_tick 			: NULL;
+	tp->set_callback	= (type == SYSTEM) ? &TIMEPOINT_set_callback 	: NULL;
+	tp->set_systick		= (type == SYSTEM) ? &TIMEPOINT_set_systick 	: NULL;
+
+	// maybe better to set all funcptr to their according func, and perform
+	// error handling in the function, according to TIMEPOINT type?
+
+	//tp->copy			= &TIMEPOINT_copy;
+    //tp->delta           = &TIMEPOINT_delta;
+    //tp->delta_ms        = &TIMEPOINT_delta_ms;
 
 	// return pointer to instance
     return tp;
