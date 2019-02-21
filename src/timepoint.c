@@ -70,7 +70,6 @@ void TIMEPOINT_tick(TIMEPOINT * this)
 		this->callback();
 	}
 
-	// return
     return;
 }
 
@@ -86,7 +85,7 @@ void TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)())
 
 INT64U TIMEPOINT_delta(TIMEPOINT * this, TIMEPOINT * other, INT8U unit)
 /****************************************************************************
-*   Input    : tp1, tp2 = Pointers to TIMEPOINT instances.
+*   Input    : this, other = Pointers to TIMEPOINT instances.
                unit = TIMEUNIT to be used.
 *   Output   : Unsigned integer.
 *   Function : Calculate absolute delta duration between two TIMEPOINTs
@@ -98,7 +97,7 @@ INT64U TIMEPOINT_delta(TIMEPOINT * this, TIMEPOINT * other, INT8U unit)
 
 INT16U TIMEPOINT_delta_ms(TIMEPOINT * this, TIMEPOINT * other)
 /****************************************************************************
-*   Input    : Pointer to this(tp1) and other(tp2) TIMEPOINT instance.
+*   Input    : this, other = Pointers to TIMEPOINT instances.
 *   Output   : Unsigned integer.
 *   Function : Calculate absolute delta duration between two TIMEPOINTs
                given in ms.
