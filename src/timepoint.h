@@ -32,6 +32,8 @@ typedef struct TIMEPOINT TIMEPOINT;
 
 /*****************************   Constants   *******************************/
 
+#define TIME_ARRAY_SIZE 4
+
 /*************************  Function interfaces ****************************/
 
 extern  TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns);
@@ -57,17 +59,26 @@ enum TIMEUNIT
     s       // 3 = seconds
 };
 
+enum TP_TYPE
+{
+    NORMAL,
+    SYSTEM
+};
+
 struct TIMEPOINT
 {
     /** Members ************************************************************/
-    INT64U time_array[4];   // indexes 0: ns, 1: us, 2: ms, 3: s
-    INT64U systick_dur_ns;
-    FUNPTR callback; //void(*callback)();
+    INT64U  time_array[TIME_ARRAY_SIZE]; // indexes 0: ns, 1: us, 2: ms, 3: s
+    INT64U  systick_dur_ns;
+
+    //TP_TYPE type;
+    FUNPTR  callback; //void(*callback)();
 
     /** Methods ************************************************************/
     void(*tick)(TIMEPOINT * this);
-    void(*copy)(TIMEPOINT * this, TIMEPOINT * other);
     void(*set_callback)(TIMEPOINT * this, void(*callback)());
+    void(*set_systick)(TIMEPOINT * this, INT64U systick_dur_ns);
+    void(*copy)(TIMEPOINT * this, TIMEPOINT * other);
     INT64U(*delta)(TIMEPOINT * this, TIMEPOINT * other, INT8U unit);
     INT16U(*delta_ms)(TIMEPOINT * this, TIMEPOINT * other);
 };

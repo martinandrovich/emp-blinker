@@ -27,6 +27,16 @@
 
 /*****************************   Variables   *******************************/
 
+/************************  Function declarations ***************************/
+
+void 	TIMEPOINT_increment(TIMEPOINT * this, INT64U value, INT8U unit);
+void 	TIMEPOINT_tick(TIMEPOINT * this);
+void 	TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)());
+void 	TIMEPOINT_set_systick(TIMEPOINT * this, INT64U systick_dur_ns);
+void 	TIMEPOINT_copy(TIMEPOINT * this, TIMEPOINT * other);
+INT64U 	TIMEPOINT_delta(TIMEPOINT * this, TIMEPOINT * other, INT8U unit);
+INT16U 	TIMEPOINT_delta_ms(TIMEPOINT * this, TIMEPOINT * other);
+
 /*****************************   Functions   *******************************/
 
 void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, INT8U unit)
@@ -37,7 +47,6 @@ void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, INT8U unit)
 *   Function : Recurisve increment of TIMEPOINT, until no overflow.
 ****************************************************************************/
 {
-
     // CPP Version
     // https://gist.github.com/martinandrovich/17615f282af047c953e0d776b218e603
 
@@ -51,8 +60,6 @@ void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, INT8U unit)
 		this->time_array[unit] = remainder;
         TIMEPOINT_increment(this, quotient, unit + 1);
 	}
-
-    return;
 }
 
 void TIMEPOINT_tick(TIMEPOINT * this)
@@ -69,8 +76,6 @@ void TIMEPOINT_tick(TIMEPOINT * this)
 	{
 		this->callback();
 	}
-
-    return;
 }
 
 void TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)())
@@ -81,6 +86,29 @@ void TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)())
 ****************************************************************************/
 {
 	this->callback = callback;
+}
+
+void TIMEPOINT_set_systick(TIMEPOINT * this, INT64U systick_dur_ns)
+/****************************************************************************
+*   Input    : this: Pointer to TIMEPOINT instance.
+			   systick_dur_ns: Duration of systick tick in ns.
+*   Function : Set the systick_dur_ns of a TIMEPOINT instance.
+****************************************************************************/
+{
+	this->systick_dur_ns = systick_dur_ns;
+}
+
+void TIMEPOINT_copy(TIMEPOINT * this, TIMEPOINT * other)
+/****************************************************************************
+*   Input    : this, other = Pointers to TIMEPOINT instances.
+*   Function : Copy time_array from other TIMEPOINT to this TIMEPOINT.
+****************************************************************************/
+{
+	// copy time_array
+	for (int i = 0; i < TIME_ARRAY_SIZE; i++)
+	{
+		this->time_array[i] = other->time_array[i];
+	}
 }
 
 INT64U TIMEPOINT_delta(TIMEPOINT * this, TIMEPOINT * other, INT8U unit)
@@ -106,6 +134,8 @@ INT16U TIMEPOINT_delta_ms(TIMEPOINT * this, TIMEPOINT * other)
     return 0;
 }
 
+/***********************   Constructive Functions   ************************/
+
 TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns)
 /****************************************************************************
 *   Function : See module specification (.h-file).
@@ -115,7 +145,8 @@ TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns)
     TIMEPOINT * tp = malloc(sizeof(TIMEPOINT));
 
     // initialize time_array
-    for (int i = 0; i < sizeof(tp->time_array)/sizeof(INT64U); i++)
+    //for (int i = 0; i < sizeof(tp->time_array)/sizeof(INT64U); i++)
+    for (int i = 0; i < TIME_ARRAY_SIZE; i++)
     {
         tp->time_array[i] = 0;
     }
@@ -125,11 +156,13 @@ TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns)
 
     // set increment value given in ns
     tp->systick_dur_ns  = systick_dur_ns;
+	//tp->type			= SYSTEM;
 
     // link function pointers
     tp->tick            = &TIMEPOINT_tick;
-	tp->copy			= NULL;
 	tp->set_callback	= &TIMEPOINT_set_callback;
+	tp->set_systick		= &TIMEPOINT_set_systick;
+	tp->copy			= &TIMEPOINT_copy;
     tp->delta           = &TIMEPOINT_delta;
     tp->delta_ms        = &TIMEPOINT_delta_ms;
 
