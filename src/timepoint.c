@@ -34,8 +34,8 @@ void 	TIMEPOINT_tick(TIMEPOINT * this);
 void 	TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)());
 void 	TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
 void 	TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit);
+void 	TIMEPOINT_set_value(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
 INT64U 	TIMEPOINT_get_value(TIMEPOINT * this, TIMEUNIT unit);
-INT64U 	TIMEPOINT_set_value(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
 
 void 	TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src);
 INT64U 	TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
@@ -104,7 +104,27 @@ void TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TIMEUNIT unit)
 	this->systick_dur_ns = duration * pow(10, 3*unit);
 }
 
+void TIMEPOINT_set_value(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE])
+/****************************************************************************
+*   Input    : this: Pointer to TIMEPOINT instance.
+			   time_array[]: Array with new values.
+*   Function : Set the time_array values of a TIMEPOINT instance.
+****************************************************************************/
+{
+	for (int i = 0; i < TIME_ARRAY_SIZE; i++)
+	{
+		this->time_array[i] = time_array[i];
+	}
+}
+
 INT64U TIMEPOINT_get_value(TIMEPOINT * this, TIMEUNIT unit)
+/****************************************************************************
+*   Input    : this = Pointer to TIMEPOINT instance.
+			   unit = desired TIMEUNIT.
+*   Output   : Unsigned long long integer.
+*   Function : Return the value of a TIMEPOINT instance given in
+			   unit defined by TIMEUNIT.
+****************************************************************************/
 {
 	INT64U sum_ns = this->time_array[0] +
 					this->time_array[1] * pow(10, 3) +
@@ -114,22 +134,11 @@ INT64U TIMEPOINT_get_value(TIMEPOINT * this, TIMEUNIT unit)
 	return (sum_ns * pow(10, -3 * unit));
 }
 
-INT64U TIMEPOINT_set_value(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE])
-{
-	
-	for (int idx = 0; idx < TIME_ARRAY_SIZE; idx++)
-	{
-		this->time_array[idx] = time_array[idx];
-	}
-	
-}
-
 void TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src)
 /****************************************************************************
 *   Function : See module specification (.h-file).
 *****************************************************************************/
 {
-	// copy time_array from source to destination
 	for (int i = 0; i < TIME_ARRAY_SIZE; i++)
 	{
 		des->time_array[i] = src->time_array[i];
@@ -182,10 +191,6 @@ TIMEPOINT * new_TIMEPOINT(TP_TYPE type)
 
 	// maybe better to set all funcptr to their according func, and perform
 	// error handling in the function, according to TIMEPOINT type?
-
-	//tp->copy			= &TIMEPOINT_copy;
-    tp->delta           = &TIMEPOINT_delta;
-    //tp->delta_ms        = &TIMEPOINT_delta_ms;
 
 	// return pointer to instance
     return tp;

@@ -63,7 +63,7 @@ extern  INT64U      TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT u
 /****************************************************************************
 *   Input    : tp1, tp2 = Pointers to TIMEPOINT instances.
                unit = TIMEUNIT to be used.
-*   Output   : Unsigned integer.
+*   Output   : Unsigned long long integer.
 *   Function : Calculate absolute delta duration between two TIMEPOINTs
                given in unit defined by TIMEUNIT.
 ****************************************************************************/
@@ -99,9 +99,6 @@ struct TIMEPOINT
     void    (*set_systick)(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
 	void    (*set_value)(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
     INT64U  (*get_value)(TIMEPOINT * this, TIMEUNIT unit);
-    // void(*copy)(TIMEPOINT * this, TIMEPOINT * other);
-    INT64U(*delta)(TIMEPOINT * this, TIMEPOINT * other, TIMEUNIT unit);
-    // INT16U(*delta_ms)(TIMEPOINT * this, TIMEPOINT * other);
 };
 
 /****************************** End Of Module ******************************/
