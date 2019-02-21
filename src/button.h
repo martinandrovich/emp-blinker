@@ -24,6 +24,8 @@
 #include "emp_type.h"
 #include "timepoint.h"
 #include "stdlib.h"
+#include "stdint.h"
+#include "tm4c123gh6pm.h"
 
 /*****************************    Defines    *******************************/
 
@@ -37,13 +39,12 @@ typedef struct BUTTON BUTTON;
 
 /********************** External declaration of Variables ******************/
 
-/*****************************   Constants   *******************************/
+extern TIMEPOINT * tp_global;
 
 /*************************  Function interfaces ****************************/
 
 extern void handler_button (BUTTON*);
 extern BUTTON* new_button();
-
 
 /*****************************    Constructs   *****************************/
 
@@ -61,7 +62,8 @@ struct BUTTON
 
     ENUM KEYSTATE state;
     TIMEPOINT tp_pressed;
-    INT16U duration;
+    INT64U duration;
+    INT8U u_timepoint_delta;
 
 /*****************************   PUBLIC FUNCT  *****************************/
 
