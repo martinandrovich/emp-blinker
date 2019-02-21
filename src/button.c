@@ -18,19 +18,20 @@
 ****************************************************************************/
 
 /***************************** Include files *******************************/
+
 #include "button.h"
-#include "stdint.h"
-#include "tm4c123gh6pm.h"
+
 /*****************************    Defines    *******************************/
-#define SW1 4
-#define DEBOUNCE_MIN 20
+#define SW1             4
+#define DEBOUNCE_MIN    20
+#define NS              0
 
 /*****************************   Constants   *******************************/
 
-/*************************  Function interfaces ****************************/
-void is_key_down(BUTTON * this);
-void debounce_button(BUTTON * this);
-void key_down(BUTTON * this );
+/*************************  Function declaration ***************************/
+void is_key_down(BUTTON* this);
+void debounce_button(BUTTON* this);
+void key_down(BUTTON* this );
 BUTTON* new_button();
 void del_button(BUTTON* this);
 
@@ -38,13 +39,14 @@ void del_button(BUTTON* this);
 
 /*****************************   Functions   *******************************/
 
-void BUTTON_handler_button(BUTTON * this)
+void BUTTON_handler_button(BUTTON* this)
 /****************************************************************************
 *   Input    : Object this pointer, this is a method
 *   Function : Finite State Machine determines, which state for button to be in
 ****************************************************************************/
 {
-    int int_systick_flag = 1; //quick fix
+    int int_systick_flag = 1; //remove
+
     if(int_systick_flag == 1)
     {
         switch (this->state)
@@ -66,64 +68,69 @@ void BUTTON_handler_button(BUTTON * this)
               break;
          }
      }
-return;
+
+     return;
 };
 
 
-void is_key_down(BUTTON * this)
+void is_key_down(BUTTON* this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate if btn pressed
 ****************************************************************************/
 {
-  if(GPIO_PORTF_DATA_R & (1 << SW1))
-  {
-      this->state = DEBOUNCING;
-      /* this->tp_pressed = tp_global; */
-  }
-  return;
+
+    if(GPIO_PORTF_DATA_R & (1 << SW1))
+    {
+        this->state = DEBOUNCING;
+        this->tp_pressed = (*tp_global);
+    }
+
+    return;
 }
 
-void debounce_button(BUTTON * this)
+void debounce_button(BUTTON* this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate debounce_state
 ****************************************************************************/
 {
-
-  if( GPIO_PORTF_DATA_R & (1 << SW1) )
-  {
-    /*
-    if(TIMEPOINT_delta_ms(tp_global,this->tp_pressed) >= DEBOUNCE_MIN)
+    if( GPIO_PORTF_DATA_R & (1 << SW1) )
     {
-      this->state = KEY_DOWN;
+        if(TIMEPOINT_delta((*tp_global), this->tp_pressed, this->u_timepoint_delta) >= DEBOUNCE_MIN)
+        {
+            this->state = KEY_DOWN;
+        }
+        else
+        {
+            this->state = DEBOUNCING;
+        };
     }
     else
     {
-      this->state = DEBOUNCING;
-    }
-    */
-  }
-  else
-  {
-    this->state = KEY_UP;
-  };
+            this->state = KEY_UP;
+    };
 
-  return;
-
+    return;
 }
 
 
-void key_down(BUTTON * this )
+void key_down(BUTTON* this )
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, pick mode
 ****************************************************************************/
 {
-  if( GPIO_PORTF_DATA_R & (1 << SW1) )
-  {
 
-  }
+    if((GPIO_PORTF_DATA_R & (1 << SW1)) == FALSE )
+    {
+
+        this->duration = TIMEPOINT_delta((*tp_global), this->tp_pressed, this->u_timepoint_delta);
+
+        this->state = KEY_UP;
+    }
+
+    return;
 }
 
 
@@ -133,10 +140,15 @@ BUTTON* new_button()
 *   Function : Constructor for Button.
 ****************************************************************************/
 {
-    BUTTON* this = malloc(sizeof(BUTTON));
-    this->handler_button = &BUTTON_handler_button;
+    BUTTON* this                =      malloc(sizeof(BUTTON));
+
+    this->handler_button        =      &BUTTON_handler_button;
+
+    this->duration              =      0;
+    this->u_timepoint_delta     =      NS;
+
     return this;
-};
+}
 
 void del_button(BUTTON* this)
 /****************************************************************************
