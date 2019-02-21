@@ -31,10 +31,9 @@
 
 void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, INT8U unit)
 /****************************************************************************
-*   Input    : this = pointer to TIMEPOINT instance
-               value = ammount to increment (unit defined by index)
-               index = index of time_array (0 = ns, 1 = us, 2 = ms ...)
-*   Output   : -
+*   Input    : this = pointer to TIMEPOINT instance.
+               value = ammount to increment (unit defined by index).
+               unit = index of time_array (0 = ns, 1 = us, 2 = ms ...).
 *   Function : Recurisve increment of TIMEPOINT, until no overflow.
 ****************************************************************************/
 {
@@ -59,19 +58,37 @@ void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, INT8U unit)
 void TIMEPOINT_tick(TIMEPOINT * this)
 /****************************************************************************
 *   Input    : Pointer to TIMEPOINT instance.
-*   Output   : -
 *   Function : Increment TIMEPOINT with a systick unit.
 ****************************************************************************/
 {
-    TIMEPOINT_increment(this, this->systick_dur_ns, ns);
+	// increment time_array
+	TIMEPOINT_increment(this, this->systick_dur_ns, ns);
+
+	// call callback if defined
+	if (this->callback != NULL)
+	{
+		this->callback();
+	}
+
+	// return
     return;
 }
 
-INT64U TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, INT8U unit)
+void TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)())
+/****************************************************************************
+*   Input    : this: Pointer to TIMEPOINT instance.
+			   callback: Pointer to void function.
+*   Function : Set the callback of a TIMEPOINT instance.
+****************************************************************************/
+{
+	this->callback = callback;
+}
+
+INT64U TIMEPOINT_delta(TIMEPOINT * this, TIMEPOINT * other, INT8U unit)
 /****************************************************************************
 *   Input    : tp1, tp2 = Pointers to TIMEPOINT instances.
-               unit = TIMEUNIT to be used
-*   Output   : Unsigned integer
+               unit = TIMEUNIT to be used.
+*   Output   : Unsigned integer.
 *   Function : Calculate absolute delta duration between two TIMEPOINTs
                given in unit defined by TIMEUNIT.
 ****************************************************************************/
@@ -79,10 +96,10 @@ INT64U TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, INT8U unit)
     return 0;
 }
 
-INT16U TIMEPOINT_delta_ms(TIMEPOINT * tp1, TIMEPOINT * tp2)
+INT16U TIMEPOINT_delta_ms(TIMEPOINT * this, TIMEPOINT * other)
 /****************************************************************************
 *   Input    : Pointer to this(tp1) and other(tp2) TIMEPOINT instance.
-*   Output   : Unsigned integer
+*   Output   : Unsigned integer.
 *   Function : Calculate absolute delta duration between two TIMEPOINTs
                given in ms.
 ****************************************************************************/
@@ -99,26 +116,32 @@ TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns)
     TIMEPOINT * tp = malloc(sizeof(TIMEPOINT));
 
     // initialize time_array
-    for (int i = 0; i < sizeof(tp->time_array)/sizeof(INT16U); i++)
+    for (int i = 0; i < sizeof(tp->time_array)/sizeof(INT64U); i++)
     {
         tp->time_array[i] = 0;
     }
+
+	// initialize callback to nullptr
+	tp->callback = NULL;
 
     // set increment value given in ns
     tp->systick_dur_ns  = systick_dur_ns;
 
     // link function pointers
     tp->tick            = &TIMEPOINT_tick;
+	tp->copy			= NULL;
+	tp->set_callback	= &TIMEPOINT_set_callback;
     tp->delta           = &TIMEPOINT_delta;
     tp->delta_ms        = &TIMEPOINT_delta_ms;
 
+	// return pointer to instance
     return tp;
-};
+}
 
-void del_TIMEPOINT(TIMEPOINT * tp)
+void del_TIMEPOINT(TIMEPOINT * this)
 /****************************************************************************
 *   Function : See module specification (.h-file).
 *****************************************************************************/
 {
-    free(tp);
-};
+    free(this);
+}

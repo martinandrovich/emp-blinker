@@ -41,10 +41,9 @@ extern  TIMEPOINT * new_TIMEPOINT(INT64U systick_dur_ns);
 *   Function : Constructor of a TIMEPOINT instance.
 ****************************************************************************/
 
-extern  void        del_TIMEPOINT(TIMEPOINT * tp);
+extern  void        del_TIMEPOINT(TIMEPOINT * this);
 /****************************************************************************
 *   Input    : Pointer to a TIMEPOINT instance.
-*   Output   : -
 *   Function : Destructor of a TIMEPOINT instance.
 ****************************************************************************/
 
@@ -61,16 +60,16 @@ enum TIMEUNIT
 struct TIMEPOINT
 {
     /** Members ************************************************************/
-
-
     INT64U time_array[4];   // indexes 0: ns, 1: us, 2: ms, 3: s
     INT64U systick_dur_ns;
+    FUNPTR callback; //void(*callback)();
 
     /** Methods ************************************************************/
     void(*tick)(TIMEPOINT * this);
-    INT64U(*delta)(TIMEPOINT * tp1, TIMEPOINT * tp2, INT8U unit);
-    INT16U(*delta_ms)(TIMEPOINT * tp1, TIMEPOINT * tp2);
-
+    void(*copy)(TIMEPOINT * this, TIMEPOINT * other);
+    void(*set_callback)(TIMEPOINT * this, void(*callback)());
+    INT64U(*delta)(TIMEPOINT * this, TIMEPOINT * other, INT8U unit);
+    INT16U(*delta_ms)(TIMEPOINT * this, TIMEPOINT * other);
 };
 
 /****************************** End Of Module ******************************/
