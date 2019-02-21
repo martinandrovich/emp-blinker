@@ -94,9 +94,10 @@ struct TIMEPOINT
     FUNPTR  callback; //void(*callback)();
 
     /** Methods ************************************************************/
-    void(*tick)(TIMEPOINT * this);
-    void(*set_callback)(TIMEPOINT * this, void(*callback)());
-    void(*set_systick)(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
+    void    (*tick)(TIMEPOINT * this);
+    void    (*set_callback)(TIMEPOINT * this, void(*callback)());
+    void    (*set_systick)(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
+    INT64U  (*get_value)(TIMEPOINT * this, TIMEUNIT unit);
     // void(*copy)(TIMEPOINT * this, TIMEPOINT * other);
     // INT64U(*delta)(TIMEPOINT * this, TIMEPOINT * other, TIMEUNIT unit);
     // INT16U(*delta_ms)(TIMEPOINT * this, TIMEPOINT * other);

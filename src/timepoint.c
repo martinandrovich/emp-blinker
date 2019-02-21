@@ -34,6 +34,7 @@ void 	TIMEPOINT_tick(TIMEPOINT * this);
 void 	TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)());
 void 	TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
 void 	TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit);
+INT64U 	TIMEPOINT_get_value(TIMEPOINT * this, TIMEUNIT unit);
 
 void 	TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src);
 INT64U 	TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
@@ -102,6 +103,16 @@ void TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TIMEUNIT unit)
 	this->systick_dur_ns = duration * pow(10, 3*unit);
 }
 
+INT64U TIMEPOINT_get_value(TIMEPOINT * this, TIMEUNIT unit)
+{
+	INT64U sum_ns = this->time_array[0] +
+					this->time_array[1] * pow(10, 3) +
+					this->time_array[2] * pow(10, 6) +
+					this->time_array[3] * pow(10, 9);
+
+	return (sum_ns * pow(10, -3 * unit));
+}
+
 void TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src)
 /****************************************************************************
 *   Function : See module specification (.h-file).
@@ -152,6 +163,7 @@ TIMEPOINT * new_TIMEPOINT(TP_TYPE type)
     tp->tick            = (type == SYSTEM) ? &TIMEPOINT_tick 			: NULL;
 	tp->set_callback	= (type == SYSTEM) ? &TIMEPOINT_set_callback 	: NULL;
 	tp->set_systick		= (type == SYSTEM) ? &TIMEPOINT_set_systick 	: NULL;
+	tp->get_value		= &TIMEPOINT_get_value;
 
 	// maybe better to set all funcptr to their according func, and perform
 	// error handling in the function, according to TIMEPOINT type?
