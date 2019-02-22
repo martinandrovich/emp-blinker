@@ -208,6 +208,8 @@ const struct TIMEPOINT_CLASS tp =
 	.new			= &TIMEPOINT_new,
 	.del			= &TIMEPOINT_del,
 
+	.tick			= &TIMEPOINT_tick,
+
 	.set_callback	= &TIMEPOINT_set_callback,
 	.set_systick	= &TIMEPOINT_set_systick,
 
