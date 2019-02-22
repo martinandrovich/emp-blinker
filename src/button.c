@@ -82,10 +82,10 @@ void BUTTON_is_key_down(BUTTON * this)
         // construct object
         if (this->tp_pressed == NULLPTR)
         {
-            this->tp_pressed = new_TIMEPOINT(NORMAL);
+            this->tp_pressed = tp.new(NORMAL);
         }
         //
-        TIMEPOINT_copy(this->tp_pressed, tp_global);
+        tp.copy(this->tp_pressed, tp_global);
     }
 }
 
@@ -97,7 +97,7 @@ void BUTTON_debounce_button(BUTTON * this)
 {
     if( GPIO_PORTF_DATA_R & (1 << BUTTON_BIT) ) //if btn pressed then
     {
-        if(TIMEPOINT_delta(this->tp_pressed, tp_global, ms) >= DEBOUNCE_MIN)
+        if(tp.delta(this->tp_pressed, tp_global, ms) >= DEBOUNCE_MIN)
         {
             this->state = KEY_DOWN;
         }
@@ -122,7 +122,7 @@ void BUTTON_key_down(BUTTON * this )
     if((GPIO_PORTF_DATA_R & (1 << BUTTON_BIT)) == FALSE )
     {
 
-        this->duration_ms  = TIMEPOINT_delta(this->tp_pressed, tp_global, ms);
+        this->duration_ms  = tp.delta(this->tp_pressed, tp_global, ms);
         this->state        = KEY_UP;
         if(this->callback != NULLPTR)
         {
