@@ -20,7 +20,7 @@ TIMEPOINT * tp_global;
 
 void ISR_SYSTICK(void)
 {
-    tp_global->tick(tp_global);
+    tp.tick(tp_global);
     // CLEAR INT FLAG
 }
 
@@ -28,19 +28,17 @@ void ISR_SYSTICK(void)
 int main(void)
 {
 
-    // Initialize global timepoint instance
-    tp_global = new_TIMEPOINT(SYSTEM);
-    tp_global->set_systick(tp_global, 200, ms);
+    // init global timepoint instance
+    tp_global = tp.new(SYSTEM);
+    tp.set_systick(tp_global, 200, ms);
+    tp.set_callback(tp_global, NULL);
 
-    // Initialize local timepoint instance
-    TIMEPOINT * tp_local = new_TIMEPOINT(NORMAL);
-
-    //tp_local->set_systick(tp_local, 200, ms); // should give runtime error
+    // init local timepoint instance
+    TIMEPOINT * tp_local = tp.new(NORMAL);
+    tp.set_value(tp_local, (INT64U[]){200, 0, 0, 2});
 
     // Test
-    TIMEPOINT_copy(tp_local, tp_global);
-    int delta_value = TIMEPOINT_delta(tp_local, tp_global, ms);
-
-    printf("Test gives: %u.", delta_value);
+    int diff = tp.delta(tp_local, tp_global, ms);
+    printf("Test gives: %u.", diff);
 }
 
