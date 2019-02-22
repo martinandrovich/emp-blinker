@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
 * University of Southern Denmark
 * Embedded Programming (EMP)
 *
@@ -6,13 +6,13 @@
 *
 * PROJECT....: emp-blinker
 *
-* DESCRIPTION: A timepoint object, used to track time.
+* DESCRIPTION: A TIMEPOINT object, used to track time.
 *
 * Change Log:
 *****************************************************************************
 * Date    Id    Change
 * YYMMDD
-* --------------------
+* ---------------------------------------------------------------------------
 * 190220  MA    Module created.
 *
 ****************************************************************************/
@@ -38,67 +38,52 @@ typedef enum    TP_TYPE TP_TYPE;
 
 #define TIME_ARRAY_SIZE 4
 
-/*************************  Function interfaces ****************************/
+/*************************  Function Interfaces ****************************/
 
-extern  TIMEPOINT * new_TIMEPOINT(TP_TYPE type);
-/****************************************************************************
-*   Input    : systick_dur_ns  = Duration of a SysTimer tick given in ns.
-*   Output   : Pointer to a new TIMEPOINT instance.
-*   Function : Constructor of a TIMEPOINT instance.
-****************************************************************************/
+/*************************    Class Functions   ****************************/
 
-extern  void        del_TIMEPOINT(TIMEPOINT * this);
-/****************************************************************************
-*   Input    : Pointer to a TIMEPOINT instance.
-*   Function : Destructor of a TIMEPOINT instance.
-****************************************************************************/
+extern const struct TIMEPOINT_CLASS
+{
+	// Constructor & Destructor
+	TIMEPOINT*	(*new)(TP_TYPE type);
+	void		(*del)(TIMEPOINT * this);
 
-extern  void        TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src);
-/****************************************************************************
-*   Input    : des, src = Pointers to TIMEPOINT instances.
-*   Function : Copy time_array from 'src' TIMEPOINT to 'des' TIMEPOINT.
-****************************************************************************/
+	// Methods
+	void		(*tick)(TIMEPOINT * this);
 
-extern  INT64U      TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
-/****************************************************************************
-*   Input    : tp1, tp2 = Pointers to TIMEPOINT instances.
-               unit = TIMEUNIT to be used.
-*   Output   : Unsigned long long integer.
-*   Function : Calculate absolute delta duration between two TIMEPOINTs
-               given in unit defined by TIMEUNIT.
-****************************************************************************/
+	void		(*set_value)(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
+	INT64U		(*get_value)(TIMEPOINT * this, TIMEUNIT unit);
+
+	void		(*set_callback)(TIMEPOINT * this, void(*callback)());
+	void		(*set_systick)(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
+
+	void		(*copy)(TIMEPOINT * des, TIMEPOINT * src);
+	INT64U		(*delta)(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
+} tp;
 
 /*****************************    Constructs   *****************************/
 
 enum TP_TYPE
 {
-    NORMAL,
-    SYSTEM
+	NORMAL,
+	SYSTEM
 };
 
 enum TIMEUNIT
 {
-    ns,     // 0 = nanoseconds
-    us,     // 1 = microseconds
-    ms,     // 2 = milliseconds
-    s       // 3 = seconds
+	ns,     // 0 = nanoseconds
+	us,     // 1 = microseconds
+	ms,     // 2 = milliseconds
+	s       // 3 = seconds
 };
 
 struct TIMEPOINT
 {
-    /** Members ************************************************************/
-    INT64U  time_array[TIME_ARRAY_SIZE]; // indexes 0: ns, 1: us, 2: ms, 3: s
-    INT64U  systick_dur_ns;
+	INT64U  time_array[TIME_ARRAY_SIZE]; // indexes 0: ns, 1: us, 2: ms, 3: s
+	INT64U  systick_dur_ns;
 
-    TP_TYPE type;
-    FUNPTR  callback; //void(*callback)();
-
-    /** Methods ************************************************************/
-    void    (*tick)(TIMEPOINT * this);
-    void    (*set_callback)(TIMEPOINT * this, void(*callback)());
-    void    (*set_systick)(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
-	void    (*set_value)(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
-    INT64U  (*get_value)(TIMEPOINT * this, TIMEUNIT unit);
+	TP_TYPE type;
+	FUNPTR  callback; //void(*callback)();
 };
 
 /****************************** End Of Module ******************************/
