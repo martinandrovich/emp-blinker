@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
 * University of Southern Denmark
 * Embedded Programming (EMP)
 *
@@ -23,9 +23,14 @@
 
 /*****************************    Defines    *******************************/
 
+typedef struct  EMP EMP;
+typedef enum    EMP_TYPE EMP_TYPE;
+
 /********************** External declaration of Variables ******************/
 
 /*****************************   Constants   *******************************/
+
+#define     INC     4;
 
 /*************************  Function interfaces ****************************/
 
@@ -33,7 +38,28 @@ extern void test2(void);
 /****************************************************************************
 *   Input    : -
 *   Output   : -
-*   Function : Test function
+*   Function : Test function 2
 ****************************************************************************/
+
+/*************************    Class Functions    ***************************/
+
+extern const struct EMP_CLASS
+{
+    void (*test1)(INT8U);
+} emp;
+
+/*****************************    Constructs   *****************************/
+
+enum EMP_TYPE
+{
+	NORMAL,
+	SYSTEM
+};
+
+struct EMP
+{
+	INT64U  data;
+	EMP_TYPE type;
+};
 
 /****************************** End Of Module ******************************/
