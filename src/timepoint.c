@@ -20,6 +20,8 @@
 /***************************** Include files *******************************/
 
 #include <math.h>
+#include <assert.h>
+
 #include "timepoint.h"
 
 /*****************************    Defines    *******************************/
@@ -34,18 +36,21 @@ static TIMEPOINT *	TIMEPOINT_new(TP_TYPE type);
 static void 		TIMEPOINT_del(TIMEPOINT * this);
 
 static void 		TIMEPOINT_tick(TIMEPOINT * this);
-static void 		TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit);
 static void 		TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)());
 static void 		TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
+static void			TIMEPOINT_set_intptr(BOOLEAN* addr);
 static void 		TIMEPOINT_set_value(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
 static INT64U 		TIMEPOINT_get_value(TIMEPOINT * this, TIMEUNIT unit);
+
+static void 		_TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit);
+static void			_TIMEPOINT_assert_intptr(TIMEPOINT * this);
 
 static void 		TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src);
 static INT64U 		TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
 
 /*****************************   Functions   *******************************/
 
-static void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit)
+static void _TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit)
 /****************************************************************************
 *   Input    : this = pointer to TIMEPOINT instance.
 			   value = ammount to increment (unit defined by index).
@@ -53,9 +58,6 @@ static void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit)
 *   Function : Recurisve increment of TIMEPOINT, until no overflow.
 ****************************************************************************/
 {
-	// CPP Version
-	// https://gist.github.com/martinandrovich/17615f282af047c953e0d776b218e603
-
 	this->time_array[unit] += value;
 
 	INT64U remainder = this->time_array[unit] % 1000;
@@ -64,8 +66,18 @@ static void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit)
 	if (remainder != this->time_array[unit]) // OR quotient > 1 ????
 	{
 		this->time_array[unit] = remainder;
-		TIMEPOINT_increment(this, quotient, unit + 1);
+		_TIMEPOINT_increment(this, quotient, unit + 1);
 	}
+}
+
+static void _TIMEPOINT_assert_intptr(TIMEPOINT * this)
+/****************************************************************************
+*   Input    : this = pointer to the TIMEPOINT to assert
+*   Function : Assert whether TIMEPOINT is NORMAL or interrupts disabled
+****************************************************************************/
+{
+	assert(tp.int_status != NULL);
+	assert(this->type == NORMAL || (*tp.int_status) == 0);
 }
 
 static void TIMEPOINT_tick(TIMEPOINT * this)
@@ -75,10 +87,10 @@ static void TIMEPOINT_tick(TIMEPOINT * this)
 ****************************************************************************/
 {
 	// increment time_array
-	TIMEPOINT_increment(this, this->systick_dur_ns, ns);
+	_TIMEPOINT_increment(this, this->systick_dur_ns, ns);
 
 	// call callback if defined
-	if (this->callback != NULL)
+	if (this->callback != NULL && this->type == SYSTEM)
 	{
 		this->callback();
 	}
@@ -104,6 +116,15 @@ static void TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TIMEUNIT un
 	this->systick_dur_ns = duration * pow(10, 3 * unit);
 }
 
+static void TIMEPOINT_set_intptr(BOOLEAN* addr)
+/****************************************************************************
+*   Input    : addr: Address of interrupt status boolean.
+*   Function : Specify the address of the interrupts status boolean.
+****************************************************************************/
+{
+	tp.int_status = addr;
+}
+
 static void TIMEPOINT_set_value(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE])
 /****************************************************************************
 *   Input    : this: Pointer to TIMEPOINT instance.
@@ -126,6 +147,9 @@ static INT64U TIMEPOINT_get_value(TIMEPOINT * this, TIMEUNIT unit)
 			   unit defined by TIMEUNIT.
 ****************************************************************************/
 {
+	// assert mutual exclusion
+	_TIMEPOINT_assert_intptr(this);
+
 	INT64U sum_ns = this->time_array[0] +
 		this->time_array[1] * pow(10, 3) +
 		this->time_array[2] * pow(10, 6) +
@@ -142,6 +166,11 @@ static void TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src)
 *   Function : Copy time_array from 'src' TIMEPOINT to 'des' TIMEPOINT.
 ****************************************************************************/
 {
+	// assert mutual exclusion
+	_TIMEPOINT_assert_intptr(des);
+	_TIMEPOINT_assert_intptr(src);
+
+	// copy values of src time_array to des time_array
 	for (int i = 0; i < TIME_ARRAY_SIZE; i++)
 	{
 		des->time_array[i] = src->time_array[i];
@@ -157,6 +186,10 @@ static INT64U TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit)
                given in unit defined by TIMEUNIT.
 ****************************************************************************/
 {
+	// assert mutual exclusion
+	_TIMEPOINT_assert_intptr(tp1);
+	_TIMEPOINT_assert_intptr(tp2);
+
 	INT64U tp1_ns = tp.get_value(tp1, ns);
 	INT64U tp2_ns = tp.get_value(tp2, ns);
 
@@ -203,8 +236,10 @@ static void TIMEPOINT_del(TIMEPOINT * this)
 
 /****************************   Class Struct   *****************************/
 
-const struct TIMEPOINT_CLASS tp =
+struct TIMEPOINT_CLASS tp =
 {
+	.int_status		= NULL,
+
 	.new			= &TIMEPOINT_new,
 	.del			= &TIMEPOINT_del,
 
@@ -212,6 +247,7 @@ const struct TIMEPOINT_CLASS tp =
 
 	.set_callback	= &TIMEPOINT_set_callback,
 	.set_systick	= &TIMEPOINT_set_systick,
+	.set_intptr		= &TIMEPOINT_set_intptr,
 
 	.set_value		= &TIMEPOINT_set_value,
 	.get_value		= &TIMEPOINT_get_value,

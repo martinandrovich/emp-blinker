@@ -40,25 +40,29 @@ typedef enum    TP_TYPE TP_TYPE;
 
 /*************************  Function Interfaces ****************************/
 
-/*************************    Class Functions   ****************************/
+/*************************    Class Functions    ***************************/
 
-extern const struct TIMEPOINT_CLASS
+extern struct TIMEPOINT_CLASS
 {
 	// Constructor & Destructor
-	TIMEPOINT*	(*new)(TP_TYPE type);
-	void		(*del)(TIMEPOINT * this);
+	TIMEPOINT*	(* const new)(TP_TYPE type);
+	void		(* const del)(TIMEPOINT * this);
+
+	// Members
+	BOOLEAN*	int_status;
 
 	// Methods
-	void		(*tick)(TIMEPOINT * this);
+	void		(* const tick)(TIMEPOINT * this);
 
-	void		(*set_value)(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
-	INT64U		(*get_value)(TIMEPOINT * this, TIMEUNIT unit);
+	void		(* const set_callback)(TIMEPOINT * this, void(*callback)());
+	void		(* const set_systick)(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
+	void		(* const set_intptr)(BOOLEAN* addr);
 
-	void		(*set_callback)(TIMEPOINT * this, void(*callback)());
-	void		(*set_systick)(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
+	void		(* const set_value)(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
+	INT64U		(* const get_value)(TIMEPOINT * this, TIMEUNIT unit);
 
-	void		(*copy)(TIMEPOINT * des, TIMEPOINT * src);
-	INT64U		(*delta)(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
+	void		(* const copy)(TIMEPOINT * des, TIMEPOINT * src);
+	INT64U		(* const delta)(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
 } tp;
 
 /*****************************    Constructs   *****************************/
@@ -79,10 +83,10 @@ enum TIMEUNIT
 
 struct TIMEPOINT
 {
-	INT64U  time_array[TIME_ARRAY_SIZE]; // indexes 0: ns, 1: us, 2: ms, 3: s
+	INT64U  volatile time_array[TIME_ARRAY_SIZE]; // 0: ns, 1: us, 2: ms, 3: s
 	INT64U  systick_dur_ns;
 
-	TP_TYPE type;
+	TP_TYPE type:1;
 	FUNPTR  callback; //void(*callback)();
 };
 
