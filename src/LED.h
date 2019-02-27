@@ -18,6 +18,7 @@
 ****************************************************************************/
 
 #pragma once
+
 #include "emp_type.h"
 
 /***************************** Include files *******************************/
@@ -32,47 +33,36 @@ typedef enum    LED_TYPE LED_TYPE;
 
 /*****************************   Constants   *******************************/
 
-#define     INC     4;
-
 /*************************  Function interfaces ****************************/
-
-
 
 /*************************    Class Functions    ***************************/
 
-extern struct LED_CLASS
+extern const struct LED_CLASS
 {
-    LED* (*const new)();
-	_Bool (*const get_state)(LED*);
-	void (*const set_state)(LED*, _Bool);
-	RGB (*const get_color)(LED*);
-	void (*const set_color)(LED*,RGB);
-	void (*const set_callback)(LED* ,void (*callback)(void));
-	void(*const del)(LED*);
-	
-	
+	LED *		(* new)(void);
+	void   		(* del)(LED*);
 
-} LED_t;
+	void   		(* set_state)(LED * this, BOOLEAN state);
+	BOOLEAN 	(* get_state)(LED * this);
+	void   		(* set_color)(LED * this, RGB);
+	RGB    		(* get_color)(LED * this);
+	void   		(* set_callback)(LED *, void (* callback)(void));
+} led;
 
 /*****************************    Constructs   *****************************/
 
-
-
-struct RGB 
+struct RGB
 {
 	INT8U R : 1;
 	INT8U G : 1;
 	INT8U B : 1;
 };
 
-
 struct LED
 {
-
-	_Bool state;
-	RGB color;
+	BOOLEAN		state;
+	RGB 		color;
 	void(*callback)(void);
-
 };
 
 /****************************** End Of Module ******************************/

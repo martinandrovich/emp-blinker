@@ -7,6 +7,7 @@
 #include "src/emp_type.h"
 #include "src/button.h"
 #include "src/timepoint.h"
+#include "src/LED.h"
 
 /*****************************    Defines    *******************************/
 
