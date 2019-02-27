@@ -23,6 +23,7 @@
 
 #include <stdlib.h>
 #include "emp_type.h"
+#include "driver.h"
 
 /*****************************    Defines    *******************************/
 
@@ -42,27 +43,24 @@ typedef enum    TP_TYPE TP_TYPE;
 
 /*************************    Class Functions    ***************************/
 
-extern struct TIMEPOINT_CLASS
+extern const struct TIMEPOINT_CLASS
 {
 	// Constructor & Destructor
-	TIMEPOINT*	(* const new)(TP_TYPE type);
-	void		(* const del)(TIMEPOINT * this);
-
-	// Members
-	BOOLEAN*	int_status;
+	TIMEPOINT*	(* new)(TP_TYPE type);
+	void		(* del)(TIMEPOINT * this);
 
 	// Methods
-	void		(* const tick)(TIMEPOINT * this);
+	void		(* tick)(TIMEPOINT * this);
 
-	void		(* const set_callback)(TIMEPOINT * this, void(*callback)());
-	void		(* const set_systick)(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
-	void		(* const set_intptr)(BOOLEAN* addr);
+	void		(* set_callback)(TIMEPOINT * this, void(*callback)());
+	void		(* set_systick)(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
+	void		(* set_intptr)(BOOLEAN* addr);
 
-	void		(* const set_value)(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
-	INT64U		(* const get_value)(TIMEPOINT * this, TIMEUNIT unit);
+	void		(* set_value)(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
+	INT64U		(* get_value)(TIMEPOINT * this, TIMEUNIT unit);
 
-	void		(* const copy)(TIMEPOINT * des, TIMEPOINT * src);
-	INT64U		(* const delta)(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
+	void		(* copy)(TIMEPOINT * des, TIMEPOINT * src);
+	INT64U		(* delta)(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
 } tp;
 
 /*****************************    Constructs   *****************************/
