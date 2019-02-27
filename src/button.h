@@ -60,7 +60,8 @@ ENUM KEYSTATE
 {
    KEY_UP        =  0,
    DEBOUNCING    =  1,
-   KEY_DOWN      =  2
+   KEY_DOWN      =  2,
+   COOLDOWN		 =  3
 };
 
 ENUM BUTTON_NAME

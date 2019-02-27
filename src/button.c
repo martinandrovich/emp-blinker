@@ -21,6 +21,7 @@
 
 #include "button.h"
 #include "driver.h"
+#include "math.h"
 
 /*****************************    Defines    *******************************/
 
@@ -35,6 +36,7 @@
 static void     _BUTTON_is_key_down(BUTTON * this);
 static void     _BUTTON_debounce_button(BUTTON * this);
 static void     _BUTTON_key_press(BUTTON * this);
+static void 	_BUTTON_key_cooldown(BUTTON * this);
 static void     _BUTTON_init_hardware(BUTTON * this);
 static void     BUTTON_set_callback(BUTTON * this, void(*callback)(INT32S duration_ms));
 
@@ -65,6 +67,10 @@ static void BUTTON_controller(BUTTON * this)
 			_BUTTON_key_press(this);
 			break;
 
+		case COOLDOWN:
+			_BUTTON_key_cooldown(this);
+			break;
+
 		default:
 			this->state = KEY_UP;
 			break;
@@ -73,7 +79,7 @@ static void BUTTON_controller(BUTTON * this)
 	if (this->pending_callback)
 	{
 		__disable_irq();
-		if (tp.delta(this->tp_pending, tp_global, ms) >= (DOUBLEPRESS_DUR_MS - this->duration_ms))
+		if (tp.delta(this->tp_pending, tp_global, ms) >= abs(DOUBLEPRESS_DUR_MS - this->duration_ms))
 		{
 			this->pending_callback = FALSE;
 			this->callback(this->duration_ms);
@@ -169,13 +175,23 @@ static void _BUTTON_key_press(BUTTON * this )
 			__enable_irq();
 		}
 
-		this->state = KEY_UP;
+		this->state = COOLDOWN;
 
 		// if(this->callback != NULL)
 		// {
 		// 	this->callback(this->duration_ms);
 		// };
 	}
+}
+
+static void _BUTTON_key_cooldown(BUTTON * this)
+{
+	__disable_irq();
+	if(tp.delta(this->tp_released, tp_global, ms) >= DEBOUNCE_MIN_MS)
+	{
+		this->state = KEY_UP;
+	}
+	__enable_irq();
 }
 
 static void BUTTON_set_callback(BUTTON * this, void(*callback)(INT32S duration_ms))
