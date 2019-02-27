@@ -4,12 +4,14 @@
 /*************************  Function declaration ***************************/
 
 static LED* 	LED_new();
+static void 	LED_del(LED * this);
+static void 	_LED_init(void);
+
 static BOOLEAN 	LED_get_state(LED * this);
 static void 	LED_set_state(LED * this, BOOLEAN state);
 static RGB 		LED_get_color(LED * this);
 static void 	LED_set_color(LED * this, RGB Value);
 static void 	LED_set_callback(LED * this, void(*callback)(void));
-static void 	LED_del(LED * this);
 
 /*****************************   Functions   *******************************/
 
@@ -22,8 +24,10 @@ static LED* LED_new(void)
 {
 	LED* obj = malloc(sizeof(LED));
 
-	obj->state = 1;
-	obj->color = (RGB){ 1,1,1 };
+	obj->state = 0;
+	obj->color = (RGB){ 0, 0, 0 };
+
+	_LED_init();
 
 	return obj;
 }
@@ -37,6 +41,26 @@ static void LED_del(LED * this)
 ****************************************************************************/
 {
 	free(this);
+}
+
+static void _LED_init(void)
+{
+	// Enable GPIO register F
+	SYSCTL_RCGCGPIO_R 	|= SYSCTL_RCGC2_GPIOF;
+
+	// Stall
+	asm volatile
+	(
+		"nop;"
+		"nop;"
+		"nop;"
+	);
+
+	// PORTF Direction (Switches input & LED output)
+	GPIO_PORTF_DIR_R 	|= (1 << LEDRED) | (1 << LEDGREEN) | (1 << LEDBLUE);
+
+	// Enable Ports
+	GPIO_PORTF_DEN_R 	|= (1 << LEDRED) | (1 << LEDGREEN) | (1 << LEDBLUE);
 }
 
 
@@ -58,6 +82,20 @@ static void LED_set_state(LED * this, BOOLEAN _state)
 ****************************************************************************/
 {
 	this->state = _state;
+	GPIO_PORTF_DATA_R &= (0 << LEDRED) | (0 << LEDBLUE) | (0 << LEDGREEN);
+
+	if(this->state == 1)
+	{
+		GPIO_PORTF_DATA_R 	|= 	(this->color.R 	<< LEDRED) 	 |
+								(this->color.G 	<< LEDGREEN) |
+								(this->color.B) << LEDBLUE;
+	}
+
+}
+
+static void LED_toggle_state(LED * this)
+{
+	LED_set_state(this, !this->state);
 }
 
 
@@ -80,6 +118,7 @@ static void LED_set_color(LED* this, RGB _value)
 ****************************************************************************/
 {
 	this->color = _value;
+	LED_set_state(this, this->state);
 }
 
 static void LED_set_callback(LED * this, void(*callback)(void))
@@ -97,10 +136,13 @@ const struct LED_CLASS led =
 {
 	.new 			= &LED_new,
 	.del 			= &LED_del,
+	.init			= &_LED_init,
 
 	.get_state 		= &LED_get_state,
 	.set_state 		= &LED_set_state,
 	.get_color 		= &LED_get_color,
 	.set_color 		= &LED_set_color,
-	.set_callback 	= &LED_set_callback
+	.set_callback 	= &LED_set_callback,
+
+	.toggle 		= &LED_toggle_state
 };

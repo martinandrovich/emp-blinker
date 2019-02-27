@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "../tm4c123gh6pm.h"
 #include "emp_type.h"
 
 /***************************** Include files *******************************/
@@ -28,6 +29,10 @@
 typedef struct  LED LED;
 typedef struct  RGB RGB;
 typedef enum    LED_TYPE LED_TYPE;
+
+#define LEDRED      1
+#define LEDBLUE     2
+#define LEDGREEN    3
 
 /********************** External declaration of Variables ******************/
 
@@ -41,12 +46,14 @@ extern const struct LED_CLASS
 {
 	LED *		(* new)(void);
 	void   		(* del)(LED*);
+	void   		(* init)(void);
 
 	void   		(* set_state)(LED * this, BOOLEAN state);
 	BOOLEAN 	(* get_state)(LED * this);
 	void   		(* set_color)(LED * this, RGB);
 	RGB    		(* get_color)(LED * this);
 	void   		(* set_callback)(LED *, void (* callback)(void));
+	void 		(* toggle)(LED * this);
 } led;
 
 /*****************************    Constructs   *****************************/

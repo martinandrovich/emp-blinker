@@ -42,10 +42,18 @@ int main(void)
     tp.set_systick(tp_global, 200, ms);
     sys_tick_init(3199999);
 
+    // create LED_new
+    LED * led_1 = led.new();
+    led.set_color(led_1, (RGB){1, 0, 0});
+    led.set_state(led_1, 1);
 
     // create button SW1
     BUTTON * btn_sw1 = btn.new(SW1);
     btn.set_callback(btn_sw1, &mofo_dannyboy);
+
+    led.set_color(led_1, (RGB){0, 1, 0});
+
+    led.toggle(led_1);
 
     for(;;)
     {

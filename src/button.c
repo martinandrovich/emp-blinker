@@ -24,7 +24,7 @@
 
 /*****************************    Defines    *******************************/
 
-#define DEBOUNCE_MIN    0
+#define DEBOUNCE_MIN    10
 #define NS              0
 #define SW1_INT         30
 #define BUTTON_BIT      this->button
@@ -202,7 +202,7 @@ static void _BUTTON_init_hardware(BUTTON * this)
             );
 
     // PORTF Direction for Button
-    GPIO_PORTF_DIR_R            &=  (0 << BUTTON_BIT);
+    GPIO_PORTF_DIR_R            &=  ~(1 << BUTTON_BIT);
 
     // PORF Pull UP - Active Low
     GPIO_PORTF_PUR_R            |=  (1 << BUTTON_BIT);
