@@ -31,14 +31,14 @@
 /*****************************   typedef   *********************************/
 
 /*************************  Function declaration ***************************/
-void BUTTON_is_key_down(BUTTON *);
-void BUTTON_debounce_button(BUTTON *);
-void BUTTON_key_down(BUTTON *);
-void BUTTON_init_hardware(BUTTON *);
-void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_ms));
+static void     _BUTTON_is_key_down(BUTTON * this);
+static void     _BUTTON_debounce_button(BUTTON * this);
+static void     _BUTTON_key_down(BUTTON * this);
+static void     _BUTTON_init_hardware(BUTTON * this);
+static void     BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_ms));
 
-BUTTON* new_BUTTON(int);
-void del_BUTTON(BUTTON *);
+static BUTTON*  BUTTON_new(BUTTON_NAME SW);
+static void     BUTTON_del(BUTTON * this);
 
 /*****************************   Variables   *******************************/
 
@@ -141,7 +141,7 @@ static void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_
 }
 
 
-static BUTTON* BUTTON_new(KEYSTATE SW)
+static BUTTON* BUTTON_new(BUTTON_NAME SW)
 /****************************************************************************
 *   Output   : Object
 *   Function : Constructor for Button.
@@ -156,7 +156,7 @@ static BUTTON* BUTTON_new(KEYSTATE SW)
 
     this->callback              =   NULL;
 
-    BUTTON_init_hardware(this);
+    _BUTTON_init_hardware(this);
 
     return this;
 }
@@ -166,7 +166,7 @@ static BUTTON* BUTTON_new(KEYSTATE SW)
 *   Function : Constructor for Button.
 ****************************************************************************/
 
-static void BUTTON_new(BUTTON * this)
+static void BUTTON_del(BUTTON * this)
 /****************************************************************************
 *   Input    : Pointer to Button object
 *   Function : Destructor for object
@@ -175,7 +175,7 @@ static void BUTTON_new(BUTTON * this)
     free(this);
 };
 
-static void BUTTON_init_hardware(BUTTON * this)
+static void _BUTTON_init_hardware(BUTTON * this)
 /****************************************************************************
 *   Input    : input this Button and Parameter
 *   Function : Setup Hardware
