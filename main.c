@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "tm4c123gh6pm.h"
+#include "src/driver.h"
 #include "src/emp_type.h"
 #include "src/button.h"
 #include "src/timepoint.h"
@@ -38,7 +39,9 @@ int main(void)
 
 	// init global timepoint instance
     tp_global = tp.new(SYSTEM);
-    //tp.set_systick(tp_global, 200, ms);
+    tp.set_systick(tp_global, 200, ms);
+    sys_tick_init(3199999);
+
 
     // create button SW1
     BUTTON * btn_sw1 = btn.new(SW1);
