@@ -20,6 +20,7 @@
 /***************************** Include files *******************************/
 
 #include "button.h"
+#include "driver.h"
 
 /*****************************    Defines    *******************************/
 
@@ -31,20 +32,20 @@
 /*****************************   typedef   *********************************/
 
 /*************************  Function declaration ***************************/
-void BUTTON_is_key_down(BUTTON *);
-void BUTTON_debounce_button(BUTTON *);
-void BUTTON_key_down(BUTTON *);
-void BUTTON_init_hardware(BUTTON *);
-void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_ms));
+static void     _BUTTON_is_key_down(BUTTON * this);
+static void     _BUTTON_debounce_button(BUTTON * this);
+static void     _BUTTON_key_press(BUTTON * this);
+static void     _BUTTON_init_hardware(BUTTON * this);
+static void     BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U duration_ms));
 
-BUTTON* new_BUTTON(int);
-void del_BUTTON(BUTTON *);
+static BUTTON*  BUTTON_new(BUTTON_NAME SW);
+static void     BUTTON_del(BUTTON * this);
 
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
 
-void BUTTON_controller(BUTTON * this)
+static void BUTTON_controller(BUTTON * this)
 /****************************************************************************
 *   Input    : Object this pointer, this is a method
 *   Function : Finite State Machine determines, which state for button to be in
@@ -53,15 +54,15 @@ void BUTTON_controller(BUTTON * this)
     switch (this->state)
     {
           case KEY_UP:
-                BUTTON_is_key_down(this);
+                _BUTTON_is_key_down(this);
           break;
           /*            ---             */
           case DEBOUNCING:
-                BUTTON_debounce_button(this);
+                _BUTTON_debounce_button(this);
           break;
           /*            ---             */
           case KEY_DOWN:
-                BUTTON_key_down(this);
+                _BUTTON_key_press(this);
           break;
           /*            ---             */
           default:
@@ -70,33 +71,37 @@ void BUTTON_controller(BUTTON * this)
      }
 };
 
-void BUTTON_is_key_down(BUTTON * this)
+static void _BUTTON_is_key_down(BUTTON * this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate if btn pressed
 ****************************************************************************/
 {
-    if( GPIO_PORTF_DATA_R & (1 << BUTTON_BIT) ) //if btn pressed then
+    if(!(GPIO_PORTF_DATA_R & (1 << BUTTON_BIT))) //if btn pressed then
     {
         this->state = DEBOUNCING;
         // construct object
-        if (this->tp_pressed == NULLPTR)
+        if (this->tp_pressed == NULL)
         {
             this->tp_pressed = tp.new(NORMAL);
         }
         //
-        tp.copy(this->tp_pressed, tp_global);
+        __disable_irq();
+            tp.copy(this->tp_pressed, tp_global);
+        __enable_irq();
     }
 }
 
-void BUTTON_debounce_button(BUTTON * this)
+static void _BUTTON_debounce_button(BUTTON * this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate debounce_state
 ****************************************************************************/
 {
-    if( GPIO_PORTF_DATA_R & (1 << BUTTON_BIT) ) //if btn pressed then
+    if(!(GPIO_PORTF_DATA_R & (1 << BUTTON_BIT))) //if btn pressed then
     {
+        __disable_irq();
+
         if(tp.delta(this->tp_pressed, tp_global, ms) >= DEBOUNCE_MIN)
         {
             this->state = KEY_DOWN;
@@ -105,6 +110,8 @@ void BUTTON_debounce_button(BUTTON * this)
         {
             this->state = DEBOUNCING;
         };
+
+        __enable_irq();
     }                                             //else go to begin state
     else
     {
@@ -113,25 +120,29 @@ void BUTTON_debounce_button(BUTTON * this)
 }
 
 
-void BUTTON_key_down(BUTTON * this )
+static void _BUTTON_key_press(BUTTON * this )
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, pick mode
 ****************************************************************************/
 {
-    if((GPIO_PORTF_DATA_R & (1 << BUTTON_BIT)) == FALSE )
+
+    if(GPIO_PORTF_DATA_R & (1 << BUTTON_BIT))
     {
 
+        __disable_irq();
         this->duration_ms  = tp.delta(this->tp_pressed, tp_global, ms);
+        __enable_irq();
+
         this->state        = KEY_UP;
-        if(this->callback != NULLPTR)
+        if(this->callback != NULL)
         {
             this->callback(this->duration_ms);
         };
     }
 }
 
-void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_ms))
+static void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U duration_ms))
 /****************************************************************************
 *   Output   : Object is input
 *   Function : Method for m_handler_button, pick mode
@@ -141,7 +152,7 @@ void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_ms))
 }
 
 
-BUTTON* new_BUTTON(int SW)
+static BUTTON* BUTTON_new(BUTTON_NAME SW)
 /****************************************************************************
 *   Output   : Object
 *   Function : Constructor for Button.
@@ -152,17 +163,21 @@ BUTTON* new_BUTTON(int SW)
     this->duration_ms           =   0;
     this->state                 =   KEY_UP;
     this->button                =   SW;
-    this->tp_pressed            =   NULLPTR;
+    this->tp_pressed            =   NULL;
 
-    this->controller            =   &BUTTON_controller;
-    this->callback              =   &BUTTON_set_callback;
+    this->callback              =   NULL;
 
-    BUTTON_init_hardware(this);
+    _BUTTON_init_hardware(this);
 
     return this;
 }
 
-void del_BUTTON(BUTTON * this)
+/****************************************************************************
+*   Output   : Object
+*   Function : Constructor for Button.
+****************************************************************************/
+
+static void BUTTON_del(BUTTON * this)
 /****************************************************************************
 *   Input    : Pointer to Button object
 *   Function : Destructor for object
@@ -171,7 +186,7 @@ void del_BUTTON(BUTTON * this)
     free(this);
 };
 
-void BUTTON_init_hardware(BUTTON * this)
+static void _BUTTON_init_hardware(BUTTON * this)
 /****************************************************************************
 *   Input    : input this Button and Parameter
 *   Function : Setup Hardware
@@ -191,6 +206,9 @@ void BUTTON_init_hardware(BUTTON * this)
 
     // PORF Pull UP - Active Low
     GPIO_PORTF_PUR_R            |=  (1 << BUTTON_BIT);
+
+    // PortF Digital enable
+    GPIO_PORTF_DEN_R            |=  (1 << BUTTON_BIT);
 
     // 0 = Edge, 1 = Level - Interrupt Sense
     // GPIO_PORTF_IS_R    &=  (0 << SW); unused
@@ -216,5 +234,17 @@ void BUTTON_init_hardware(BUTTON * this)
     // Enable interrupt on PORTF
     // NVIC_EN0_R |= (1 << SW1_INT); //Enable interrupt
 };
+/****************************************************************************
+*   Function : Struct BTN
+****************************************************************************/
+struct BUTTON_CLASS btn =
+{
+    .new                            = &BUTTON_new,
+    .del                            = &BUTTON_del,
+
+    .controller                     = &BUTTON_controller,
+    .set_callback                   = &BUTTON_set_callback
+};
+
 
 /****************************** End Of Module *******************************/

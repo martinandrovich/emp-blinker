@@ -29,23 +29,30 @@
 /*****************************    Defines    *******************************/
 
 typedef struct BUTTON BUTTON;
+typedef enum   BUTTON_NAME BUTTON_NAME;
+typedef enum   KEYSTATE KEYSTATE;
 
 /*****************************   Constants   *******************************/
-
-/*****************************   Variables   *******************************/
-
-/*****************************   Functions   *******************************/
 
 /********************** External declaration of Variables ******************/
 
-/*****************************   Constants   *******************************/
-
 extern TIMEPOINT * tp_global;
 
-/*************************  Function interfaces ****************************/
+/*****************************   Functions   *******************************/
 
-extern BUTTON* new_BUTTON(int SW);
-extern void del_BUTTON(BUTTON*);
+/*****************************   MAIN STRUCT   *****************************/
+
+extern struct BUTTON_CLASS
+{
+    // Constructor & Destructor
+    BUTTON*	(* const new)(BUTTON_NAME SW);
+    void    (* const del)(BUTTON * this);
+
+    /** Methods ************************************************************/
+    void (* const controller)(BUTTON * this);
+    void (* const set_callback)(BUTTON * this, void(*callback)(INT64U duration_ms));
+
+} btn;
 
 /*****************************    Constructs   *****************************/
 
@@ -56,13 +63,11 @@ ENUM KEYSTATE
    KEY_DOWN      =  2
 };
 
-ENUM BUTTONS
+ENUM BUTTON_NAME
 {
    SW2           =  0,
    SW1           =  4
 };
-
-/*****************************   MAIN STRUCT   *****************************/
 
 struct BUTTON
 {
@@ -70,13 +75,9 @@ struct BUTTON
     ENUM KEYSTATE state;
     TIMEPOINT * tp_pressed;
     INT64U duration_ms;
-    INT8U button;
+    BUTTON_NAME button;
 
-    /** Methods ************************************************************/
-    void (*callback)();
-    void (*controller)(BUTTON * this);
-    void (*set_callback)(BUTTON * this, void(*callback)(INT64U _duration_ms));
-
+    void (* callback)(INT64U duration_ms);
 };
 
 /****************************** End Of Module ******************************/
