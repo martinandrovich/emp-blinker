@@ -50,7 +50,7 @@ extern struct BUTTON_CLASS
 
     /** Methods ************************************************************/
     void (* const controller)(BUTTON * this);
-    void (* const set_callback)(BUTTON * this, void(*callback)(INT64U _duration_ms));
+    void (* const set_callback)(BUTTON * this, void(*callback)(INT64U duration_ms));
 
 } btn;
 
@@ -75,9 +75,9 @@ struct BUTTON
     ENUM KEYSTATE state;
     TIMEPOINT * tp_pressed;
     INT64U duration_ms;
-    INT8U button;
+    BUTTON_NAME button;
 
-    void (* callback)();
+    void (* callback)(INT64U duration_ms);
 };
 
 /****************************** End Of Module ******************************/

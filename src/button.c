@@ -20,6 +20,7 @@
 /***************************** Include files *******************************/
 
 #include "button.h"
+#include "driver.h"
 
 /*****************************    Defines    *******************************/
 
@@ -33,9 +34,9 @@
 /*************************  Function declaration ***************************/
 static void     _BUTTON_is_key_down(BUTTON * this);
 static void     _BUTTON_debounce_button(BUTTON * this);
-static void     _BUTTON_key_down(BUTTON * this);
+static void     _BUTTON_key_press(BUTTON * this);
 static void     _BUTTON_init_hardware(BUTTON * this);
-static void     BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_ms));
+static void     BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U duration_ms));
 
 static BUTTON*  BUTTON_new(BUTTON_NAME SW);
 static void     BUTTON_del(BUTTON * this);
@@ -61,7 +62,7 @@ static void BUTTON_controller(BUTTON * this)
           break;
           /*            ---             */
           case KEY_DOWN:
-                _BUTTON_key_down(this);
+                _BUTTON_key_press(this);
           break;
           /*            ---             */
           default:
@@ -76,16 +77,18 @@ static void _BUTTON_is_key_down(BUTTON * this)
 *   Function : Method for m_handler_button, calculate if btn pressed
 ****************************************************************************/
 {
-    if( GPIO_PORTF_DATA_R & (1 << BUTTON_BIT) ) //if btn pressed then
+    if(!(GPIO_PORTF_DATA_R & (1 << BUTTON_BIT))) //if btn pressed then
     {
         this->state = DEBOUNCING;
         // construct object
-        if (this->tp_pressed == NULLPTR)
+        if (this->tp_pressed == NULL)
         {
             this->tp_pressed = tp.new(NORMAL);
         }
         //
-        tp.copy(this->tp_pressed, tp_global);
+        __disable_irq();
+            tp.copy(this->tp_pressed, tp_global);
+        __enable_irq();
     }
 }
 
@@ -95,8 +98,10 @@ static void _BUTTON_debounce_button(BUTTON * this)
 *   Function : Method for m_handler_button, calculate debounce_state
 ****************************************************************************/
 {
-    if( GPIO_PORTF_DATA_R & (1 << BUTTON_BIT) ) //if btn pressed then
+    if(!(GPIO_PORTF_DATA_R & (1 << BUTTON_BIT))) //if btn pressed then
     {
+        __disable_irq();
+
         if(tp.delta(this->tp_pressed, tp_global, ms) >= DEBOUNCE_MIN)
         {
             this->state = KEY_DOWN;
@@ -105,6 +110,8 @@ static void _BUTTON_debounce_button(BUTTON * this)
         {
             this->state = DEBOUNCING;
         };
+
+        __enable_irq();
     }                                             //else go to begin state
     else
     {
@@ -113,16 +120,20 @@ static void _BUTTON_debounce_button(BUTTON * this)
 }
 
 
-static void _BUTTON_key_down(BUTTON * this )
+static void _BUTTON_key_press(BUTTON * this )
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, pick mode
 ****************************************************************************/
 {
-    if((GPIO_PORTF_DATA_R & (1 << BUTTON_BIT)) == FALSE )
+
+    if(GPIO_PORTF_DATA_R & (1 << BUTTON_BIT))
     {
 
+        __disable_irq();
         this->duration_ms  = tp.delta(this->tp_pressed, tp_global, ms);
+        __enable_irq();
+
         this->state        = KEY_UP;
         if(this->callback != NULL)
         {
@@ -131,7 +142,7 @@ static void _BUTTON_key_down(BUTTON * this )
     }
 }
 
-static void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_ms))
+static void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U duration_ms))
 /****************************************************************************
 *   Output   : Object is input
 *   Function : Method for m_handler_button, pick mode
@@ -195,6 +206,9 @@ static void _BUTTON_init_hardware(BUTTON * this)
 
     // PORF Pull UP - Active Low
     GPIO_PORTF_PUR_R            |=  (1 << BUTTON_BIT);
+
+    // PortF Digital enable
+    GPIO_PORTF_DEN_R            |=  (1 << BUTTON_BIT);
 
     // 0 = Edge, 1 = Level - Interrupt Sense
     // GPIO_PORTF_IS_R    &=  (0 << SW); unused
