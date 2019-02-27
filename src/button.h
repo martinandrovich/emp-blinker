@@ -44,13 +44,13 @@ extern TIMEPOINT * tp_global;
 
 extern struct BUTTON_CLASS
 {
-    // Constructor & Destructor
-    BUTTON*	(* const new)(BUTTON_NAME SW);
-    void    (* const del)(BUTTON * this);
+	// Constructor & Destructor
+	BUTTON*	(* const new)(BUTTON_NAME SW);
+	void    (* const del)(BUTTON * this);
 
-    /** Methods ************************************************************/
-    void (* const controller)(BUTTON * this);
-    void (* const set_callback)(BUTTON * this, void(*callback)(INT64U duration_ms));
+	/** Methods ************************************************************/
+	void (* const controller)(BUTTON * this);
+	void (* const set_callback)(BUTTON * this, void(*callback)(INT32S duration_ms));
 
 } btn;
 
@@ -71,13 +71,19 @@ ENUM BUTTON_NAME
 
 struct BUTTON
 {
-    /** Members ************************************************************/
-    ENUM KEYSTATE state;
-    TIMEPOINT * tp_pressed;
-    INT64U duration_ms;
-    BUTTON_NAME button;
+	/** Members ************************************************************/
+	ENUM KEYSTATE state;
+	TIMEPOINT * tp_pressed;
+	TIMEPOINT * tp_released;
+	TIMEPOINT * tp_db;
+	TIMEPOINT * tp_pending;
+	INT32S duration_ms;
+	INT32S db_delta_ms;
+	BUTTON_NAME button;
 
-    void (* callback)(INT64U duration_ms);
+	BOOLEAN pending_callback;
+
+	void (* callback)(INT32S duration_ms);
 };
 
 /****************************** End Of Module ******************************/
