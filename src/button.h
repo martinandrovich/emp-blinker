@@ -73,9 +73,9 @@ struct BUTTON
     INT8U button;
 
     /** Methods ************************************************************/
-    void (*callback)();
-    void (*controller)(BUTTON * this);
-    void (*set_callback)(BUTTON * this, void(*callback)(INT64U _duration_ms));
+    void (* const callback)();
+    void (* const controller)(BUTTON * this);
+    void (* const set_callback)(BUTTON * this, void(*callback)(INT64U _duration_ms));
 
 };
 

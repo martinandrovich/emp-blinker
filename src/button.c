@@ -44,7 +44,7 @@ void del_BUTTON(BUTTON *);
 
 /*****************************   Functions   *******************************/
 
-void BUTTON_controller(BUTTON * this)
+static void BUTTON_controller(BUTTON * this)
 /****************************************************************************
 *   Input    : Object this pointer, this is a method
 *   Function : Finite State Machine determines, which state for button to be in
@@ -70,7 +70,7 @@ void BUTTON_controller(BUTTON * this)
      }
 };
 
-void BUTTON_is_key_down(BUTTON * this)
+static void BUTTON_is_key_down(BUTTON * this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate if btn pressed
@@ -89,7 +89,7 @@ void BUTTON_is_key_down(BUTTON * this)
     }
 }
 
-void BUTTON_debounce_button(BUTTON * this)
+static void BUTTON_debounce_button(BUTTON * this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate debounce_state
@@ -113,7 +113,7 @@ void BUTTON_debounce_button(BUTTON * this)
 }
 
 
-void BUTTON_key_down(BUTTON * this )
+static void BUTTON_key_down(BUTTON * this )
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, pick mode
@@ -131,7 +131,7 @@ void BUTTON_key_down(BUTTON * this )
     }
 }
 
-void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_ms))
+static void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_ms))
 /****************************************************************************
 *   Output   : Object is input
 *   Function : Method for m_handler_button, pick mode
