@@ -12,6 +12,8 @@
 
 /*****************************    Defines    *******************************/
 
+#define SYSTICK_ms		1
+
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
@@ -44,8 +46,9 @@ int main(void)
 
 	// init global timepoint instance
     tp_global = tp.new(SYSTEM);
-    tp.set_systick(tp_global, 1, ms);
-    sys_tick_init(15999); //1 ms
+    tp.set_systick(tp_global, SYSTICK_ms, ms);
+
+    sys_tick_init(SYSTICK_ms);
 
     // create LED_new
     led_1 = led.new();
