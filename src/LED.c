@@ -13,6 +13,9 @@ static RGB 		LED_get_color(LED * this);
 static void 	LED_set_color(LED * this, RGB Value);
 static void 	LED_set_callback(LED * this, void(*callback)(void));
 
+static void 	LED_toggle_state(LED * this);
+static void 	LED_invert_colors (LED * this);
+
 /*****************************   Functions   *******************************/
 
 static LED* LED_new(void)
@@ -121,6 +124,13 @@ static void LED_set_color(LED* this, RGB _value)
 	LED_set_state(this, this->state);
 }
 
+static void LED_invert_colors (LED * this)
+{
+	// cast struct to char pointer, then deref and xor to invert
+	*(char*)(&this->color) ^= 0xFF;
+	LED_set_state(this, this->state);
+}
+
 static void LED_set_callback(LED * this, void(*callback)(void))
 /****************************************************************************
 *   Input    : Instance of LED, the desired function that should be called whenever, an event occurs.
@@ -144,5 +154,6 @@ const struct LED_CLASS led =
 	.set_color 		= &LED_set_color,
 	.set_callback 	= &LED_set_callback,
 
-	.toggle 		= &LED_toggle_state
+	.toggle 		= &LED_toggle_state,
+	.invert_colors 	= &LED_invert_colors
 };

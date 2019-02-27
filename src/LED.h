@@ -53,7 +53,9 @@ extern const struct LED_CLASS
 	void   		(* set_color)(LED * this, RGB);
 	RGB    		(* get_color)(LED * this);
 	void   		(* set_callback)(LED *, void (* callback)(void));
+
 	void 		(* toggle)(LED * this);
+	void 		(* invert_colors)(LED * this);
 } led;
 
 /*****************************    Constructs   *****************************/
