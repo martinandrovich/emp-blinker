@@ -29,11 +29,21 @@ void ISR_SYSTICK(void)
     tp.tick(tp_global);
 }
 
-void mofo_dannyboy(INT64U duration_ms)
+void mofo_dannyboy(INT32S duration_ms)
 {
 	//printf("Daniel er en fucktard.");
 	__enable_irq();
+
+	if(duration_ms == -1)
+	{
+		//led.set_color(led_1, (RGB){0, 0, 1});
+		led.invert_colors(led_1);
+	}
+	else
+	{
 		led.toggle(led_1);
+	}
+
 	__disable_irq();
 }
 
