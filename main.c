@@ -17,6 +17,8 @@
 /*****************************   Variables   *******************************/
 
 TIMEPOINT * tp_global;
+LED * led_1;
+
 
 /************************   Interrupt Handlers   ***************************/
 
@@ -27,7 +29,10 @@ void ISR_SYSTICK(void)
 
 void mofo_dannyboy(INT64U duration_ms)
 {
-	printf("Daniel er en fucktard.");
+	//printf("Daniel er en fucktard.");
+	__enable_irq();
+		led.toggle(led_1);
+	__disable_irq();
 }
 
 /*******************************   Main   **********************************/
@@ -39,11 +44,11 @@ int main(void)
 
 	// init global timepoint instance
     tp_global = tp.new(SYSTEM);
-    tp.set_systick(tp_global, 200, ms);
-    sys_tick_init(3199999);
+    tp.set_systick(tp_global, 1, ms);
+    sys_tick_init(15999); //1 ms
 
     // create LED_new
-    LED * led_1 = led.new();
+    led_1 = led.new();
     led.set_color(led_1, (RGB){1, 0, 0});
     led.set_state(led_1, 1);
 
@@ -52,8 +57,6 @@ int main(void)
     btn.set_callback(btn_sw1, &mofo_dannyboy);
 
     led.set_color(led_1, (RGB){0, 1, 0});
-
-    led.toggle(led_1);
 
     for(;;)
     {
