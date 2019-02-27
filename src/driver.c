@@ -32,6 +32,11 @@ BOOLEAN get_irq(void)
     return (BOOLEAN)irq_status;
 }
 
+static int set_systick_reload_value(INT32U tick_period)
+{
+    return tick_period * 16000;
+}
+
 void sys_tick_init(INT32U tick_period)
 {
     //
@@ -39,10 +44,10 @@ void sys_tick_init(INT32U tick_period)
     NVIC_ST_CTRL_R &=  ~(NVIC_ST_CTRL_ENABLE);
     // calculate (200 ms / 62.5 ns)-1 = 0x30D3FF
     // tick_period = SYSTICK_RELOAD_VALUE 3199999 // 200 mS
-    NVIC_ST_CURRENT_R = tick_period;
+    NVIC_ST_CURRENT_R = set_systick_reload_value(tick_period);
     //
     // Set Reload value, Systick reload register
-    NVIC_ST_RELOAD_R = tick_period;
+    NVIC_ST_RELOAD_R = set_systick_reload_value(tick_period);
     //
     // On a write, removes the pending state from the SysTick exception s. 159
     NVIC_INT_CTRL_R |= NVIC_INT_CTRL_UNPEND_SYST;
@@ -56,5 +61,4 @@ void sys_tick_init(INT32U tick_period)
     //
     // Enable and start timer
     NVIC_ST_CTRL_R |= NVIC_ST_CTRL_ENABLE;
-
 }
