@@ -53,15 +53,15 @@ static void BUTTON_controller(BUTTON * this)
     switch (this->state)
     {
           case KEY_UP:
-                BUTTON_is_key_down(this);
+                _BUTTON_is_key_down(this);
           break;
           /*            ---             */
           case DEBOUNCING:
-                BUTTON_debounce_button(this);
+                _BUTTON_debounce_button(this);
           break;
           /*            ---             */
           case KEY_DOWN:
-                BUTTON_key_down(this);
+                _BUTTON_key_down(this);
           break;
           /*            ---             */
           default:
@@ -70,7 +70,7 @@ static void BUTTON_controller(BUTTON * this)
      }
 };
 
-static void BUTTON_is_key_down(BUTTON * this)
+static void _BUTTON_is_key_down(BUTTON * this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate if btn pressed
@@ -89,7 +89,7 @@ static void BUTTON_is_key_down(BUTTON * this)
     }
 }
 
-static void BUTTON_debounce_button(BUTTON * this)
+static void _BUTTON_debounce_button(BUTTON * this)
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, calculate debounce_state
@@ -113,7 +113,7 @@ static void BUTTON_debounce_button(BUTTON * this)
 }
 
 
-static void BUTTON_key_down(BUTTON * this )
+static void _BUTTON_key_down(BUTTON * this )
 /****************************************************************************
 *   Output   : Object
 *   Function : Method for m_handler_button, pick mode
@@ -124,7 +124,7 @@ static void BUTTON_key_down(BUTTON * this )
 
         this->duration_ms  = tp.delta(this->tp_pressed, tp_global, ms);
         this->state        = KEY_UP;
-        if(this->callback != NULLPTR)
+        if(this->callback != NULL)
         {
             this->callback(this->duration_ms);
         };
@@ -141,7 +141,7 @@ static void BUTTON_set_callback(BUTTON * this, void(*callback)(INT64U _duration_
 }
 
 
-BUTTON* new_BUTTON(int SW)
+static BUTTON* BUTTON_new(KEYSTATE SW)
 /****************************************************************************
 *   Output   : Object
 *   Function : Constructor for Button.
@@ -152,17 +152,21 @@ BUTTON* new_BUTTON(int SW)
     this->duration_ms           =   0;
     this->state                 =   KEY_UP;
     this->button                =   SW;
-    this->tp_pressed            =   NULLPTR;
+    this->tp_pressed            =   NULL;
 
-    this->controller            =   &BUTTON_controller;
-    this->callback              =   &BUTTON_set_callback;
+    this->callback              =   NULL;
 
     BUTTON_init_hardware(this);
 
     return this;
 }
 
-void del_BUTTON(BUTTON * this)
+/****************************************************************************
+*   Output   : Object
+*   Function : Constructor for Button.
+****************************************************************************/
+
+static void BUTTON_new(BUTTON * this)
 /****************************************************************************
 *   Input    : Pointer to Button object
 *   Function : Destructor for object
@@ -171,7 +175,7 @@ void del_BUTTON(BUTTON * this)
     free(this);
 };
 
-void BUTTON_init_hardware(BUTTON * this)
+static void BUTTON_init_hardware(BUTTON * this)
 /****************************************************************************
 *   Input    : input this Button and Parameter
 *   Function : Setup Hardware
@@ -216,5 +220,17 @@ void BUTTON_init_hardware(BUTTON * this)
     // Enable interrupt on PORTF
     // NVIC_EN0_R |= (1 << SW1_INT); //Enable interrupt
 };
+/****************************************************************************
+*   Function : Struct BTN
+****************************************************************************/
+struct BUTTON_CLASS btn =
+{
+    .new                            = &BUTTON_new,
+    .del                            = &BUTTON_del,
+
+    .controller                     = &BUTTON_controller,
+    .set_callback                   = &BUTTON_set_callback
+};
+
 
 /****************************** End Of Module *******************************/

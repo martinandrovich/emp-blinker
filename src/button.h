@@ -29,6 +29,8 @@
 /*****************************    Defines    *******************************/
 
 typedef struct BUTTON BUTTON;
+typedef enum   BUTTON_NAME BUTTON_NAME;
+typedef enum   KEYSTATE KEYSTATE;
 
 /*****************************   Constants   *******************************/
 
@@ -36,16 +38,19 @@ typedef struct BUTTON BUTTON;
 
 /*****************************   Functions   *******************************/
 
-/********************** External declaration of Variables ******************/
+/*****************************   MAIN STRUCT   *****************************/
 
-/*****************************   Constants   *******************************/
+extern struct BUTTON_CLASS
+{
+    // Constructor & Destructor
+    BUTTON*	(* const new)(BUTTON_NAME SW);
+    void    (* const del)(BUTTON * this);
 
-extern TIMEPOINT * tp_global;
+    /** Methods ************************************************************/
+    void (* const controller)(BUTTON * this);
+    void (* const set_callback)(BUTTON * this, void(*callback)(INT64U _duration_ms));
 
-/*************************  Function interfaces ****************************/
-
-extern BUTTON* new_BUTTON(int SW);
-extern void del_BUTTON(BUTTON*);
+} btn;
 
 /*****************************    Constructs   *****************************/
 
@@ -56,13 +61,11 @@ ENUM KEYSTATE
    KEY_DOWN      =  2
 };
 
-ENUM BUTTONS
+ENUM BUTTON_NAME
 {
    SW2           =  0,
    SW1           =  4
 };
-
-/*****************************   MAIN STRUCT   *****************************/
 
 struct BUTTON
 {
@@ -72,11 +75,7 @@ struct BUTTON
     INT64U duration_ms;
     INT8U button;
 
-    /** Methods ************************************************************/
-    void (* const callback)();
-    void (* const controller)(BUTTON * this);
-    void (* const set_callback)(BUTTON * this, void(*callback)(INT64U _duration_ms));
-
+    void (* callback)();
 };
 
 /****************************** End Of Module ******************************/
