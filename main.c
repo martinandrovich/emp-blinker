@@ -22,7 +22,6 @@ TIMEPOINT * tp_global;
 void ISR_SYSTICK(void)
 {
     tp.tick(tp_global);
-    // CLEAR INT FLAG
 }
 
 void mofo_dannyboy(INT64U duration_ms)
@@ -59,4 +58,3 @@ int main(void)
     //int diff = tp.delta(tp_local, tp_global, ms);
     //printf("Test gives: %u.", diff);
 }
-

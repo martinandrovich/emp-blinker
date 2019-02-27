@@ -75,7 +75,7 @@ static void _TIMEPOINT_assert_irq(TIMEPOINT * this)
 *   Function : Assert whether TIMEPOINT is NORMAL or interrupts disabled
 ****************************************************************************/
 {
-	assert(this->type == NORMAL || __get__irq() == 0);
+	assert(this->type == NORMAL || get_irq() == 0);
 }
 
 static void TIMEPOINT_tick(TIMEPOINT * this)

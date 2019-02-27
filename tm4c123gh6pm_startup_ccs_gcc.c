@@ -4,7 +4,7 @@
 //
 // Copyright (c) 2011-2014 Texas Instruments Incorporated.  All rights reserved.
 // Software License Agreement
-// 
+//
 // Software License Agreement
 //
 // Texas Instruments (TI) is supplying this software for use solely and
@@ -44,6 +44,7 @@ static void IntDefaultHandler(void);
 //
 //*****************************************************************************
 extern int main(void);
+extern void ISR_SYSTICK(void);
 
 //*****************************************************************************
 //
@@ -85,7 +86,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // Debug monitor handler
     0,                                      // Reserved
     IntDefaultHandler,                      // The PendSV handler
-    IntDefaultHandler,                      // The SysTick handler
+    ISR_SYSTICK,                            // The SysTick handler
     IntDefaultHandler,                      // GPIO Port A
     IntDefaultHandler,                      // GPIO Port B
     IntDefaultHandler,                      // GPIO Port C
@@ -288,7 +289,7 @@ ResetISR(void)
     // this project.
     //
     HWREG(0xE000ED88) = ((HWREG(0xE000ED88) & ~0x00F00000) | 0x00F00000);
-    
+
     //
     // Call the application's entry point.
     //
