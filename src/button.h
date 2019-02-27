@@ -22,9 +22,10 @@
 /***************************** Include files *******************************/
 
 #include "emp_type.h"
-#include "timepoint.h"
 #include "stdlib.h"
 #include "tm4c123gh6pm.h"
+#include "timepoint.h"
+#include "driver.h"
 
 /*****************************    Defines    *******************************/
 
