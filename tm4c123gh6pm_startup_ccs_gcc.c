@@ -44,8 +44,6 @@ static void IntDefaultHandler(void);
 //
 //*****************************************************************************
 extern int main(void);
-extern void ISR_SYSTICK(void);
-
 //*****************************************************************************
 //
 // Reserve space for the system stack.
@@ -60,6 +58,7 @@ static uint32_t pui32Stack[128];
 //*****************************************************************************
 // To be added by user
 
+extern void ISR_SYSTICK(void);
 //*****************************************************************************
 //
 // The vector table.  Note that the proper constructs must be placed on this to
