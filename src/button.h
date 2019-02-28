@@ -21,9 +21,10 @@
 
 /***************************** Include files *******************************/
 
-#include "emp_type.h"
-#include "stdlib.h"
+#include <stdlib.h>
+
 #include "tm4c123gh6pm.h"
+#include "emp_type.h"
 #include "timepoint.h"
 #include "driver.h"
 
@@ -41,7 +42,7 @@ extern TIMEPOINT * tp_global;
 
 /*****************************   Functions   *******************************/
 
-/*****************************   MAIN STRUCT   *****************************/
+/*************************    Class Functions    ***************************/
 
 extern struct BUTTON_CLASS
 {
@@ -57,7 +58,7 @@ extern struct BUTTON_CLASS
 
 /*****************************    Constructs   *****************************/
 
-ENUM KEYSTATE
+enum KEYSTATE
 {
    KEY_UP        =  0,
    DEBOUNCING    =  1,
@@ -65,7 +66,7 @@ ENUM KEYSTATE
    COOLDOWN		 =  3
 };
 
-ENUM BUTTON_NAME
+enum BUTTON_NAME
 {
    SW2           =  0,
    SW1           =  4

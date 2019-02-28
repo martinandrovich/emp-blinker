@@ -19,29 +19,35 @@
 
 /***************************** Include files *******************************/
 
+#include <math.h>
+
 #include "button.h"
 #include "driver.h"
-#include "math.h"
 
 /*****************************    Defines    *******************************/
 
-#define DEBOUNCE_MIN_MS     10
+#define DEBOUNCE_DUR_MS     10
+#define COOLDOWN_DUR_MS		10
 #define DOUBLEPRESS_DUR_MS  300
+#define LONGPRESS_DUR_MS	2000
+
 #define SW1_INT             30
 #define BUTTON_BIT          this->button
 
 /*****************************   typedef   *********************************/
 
 /*************************  Function declaration ***************************/
+
+static BUTTON*  BUTTON_new(BUTTON_NAME SW);
+static void     BUTTON_del(BUTTON * this);
+
+static void     BUTTON_set_callback(BUTTON* this, void(*callback)(INT32S duration_ms));
+
 static void     _BUTTON_is_key_down(BUTTON * this);
 static void     _BUTTON_debounce_button(BUTTON * this);
 static void     _BUTTON_key_press(BUTTON * this);
 static void 	_BUTTON_key_cooldown(BUTTON * this);
 static void     _BUTTON_init_hardware(BUTTON * this);
-static void     BUTTON_set_callback(BUTTON * this, void(*callback)(INT32S duration_ms));
-
-static BUTTON*  BUTTON_new(BUTTON_NAME SW);
-static void     BUTTON_del(BUTTON * this);
 
 /*****************************   Variables   *******************************/
 
@@ -53,6 +59,7 @@ static void BUTTON_controller(BUTTON * this)
 *   Function : Finite State Machine determines, which state for button to be in
 ****************************************************************************/
 {
+	// state machine
 	switch (this->state)
 	{
 		case KEY_UP:
@@ -76,18 +83,23 @@ static void BUTTON_controller(BUTTON * this)
 			break;
 	}
 
+	// check pending callback
 	if (this->pending_callback)
 	{
+		// get duration since pending callback
 		__disable_irq();
-		if (tp.delta(this->tp_pending, tp_global, ms) >= abs(DOUBLEPRESS_DUR_MS - this->duration_ms))
+		INT32U delta_pending = tp.delta(this->tp_pending, tp_global, ms);
+		__enable_irq();
+
+		// check if callback is to be called
+		if (delta_pending >= abs(DOUBLEPRESS_DUR_MS - this->duration_ms))
 		{
 			this->pending_callback = FALSE;
 			this->callback(this->duration_ms);
 		}
-		__enable_irq();
 	}
 
-};
+}
 
 static void _BUTTON_is_key_down(BUTTON * this)
 /****************************************************************************
@@ -95,11 +107,12 @@ static void _BUTTON_is_key_down(BUTTON * this)
 *   Function : Method for m_handler_button, calculate if btn pressed
 ****************************************************************************/
 {
-	if(!(GPIO_PORTF_DATA_R & (1 << BUTTON_BIT))) //if btn pressed then
+	// check if button is pressed
+	if(!(GPIO_PORTF_DATA_R & (1 << BUTTON_BIT)))
 	{
 		this->state = DEBOUNCING;
 
-		// construct object
+		// construct objects
 		if (this->tp_pressed == NULL)
 		{
 			this->tp_pressed = tp.new(NORMAL);
@@ -119,23 +132,21 @@ static void _BUTTON_debounce_button(BUTTON * this)
 *   Function : Method for m_handler_button, calculate debounce_state
 ****************************************************************************/
 {
-	if(!(GPIO_PORTF_DATA_R & (1 << BUTTON_BIT))) //if btn pressed then
+	// check if button is still pressed
+	if(!(GPIO_PORTF_DATA_R & (1 << BUTTON_BIT)))
 	{
 		__disable_irq();
 
-		if(tp.delta(this->tp_pressed, tp_global, ms) >= DEBOUNCE_MIN_MS)
+		// check if debounce duration has been passed
+		if(tp.delta(this->tp_pressed, tp_global, ms) >= DEBOUNCE_DUR_MS)
 		{
 			this->db_delta_ms = (INT32S)tp.delta(this->tp_db, tp_global, ms);
 			tp.copy(this->tp_db, tp_global);
 			this->state = KEY_DOWN;
 		}
-		else
-		{
-			this->state = DEBOUNCING;
-		};
 
 		__enable_irq();
-	}                                             //else go to begin state
+	}
 	else
 	{
 		this->state = KEY_UP;
@@ -149,7 +160,7 @@ static void _BUTTON_key_press(BUTTON * this )
 *   Function : Method for m_handler_button, pick mode
 ****************************************************************************/
 {
-
+	// check if button has been released (pressed)
 	if(GPIO_PORTF_DATA_R & (1 << BUTTON_BIT))
 	{
 		// update duration
@@ -161,12 +172,14 @@ static void _BUTTON_key_press(BUTTON * this )
 		// calculate time since last debounce
 		INT32U diff_tp = this->db_delta_ms + this->duration_ms;
 
+		// check whether button has been doublepressed
 		if (diff_tp < DOUBLEPRESS_DUR_MS)
 		{
 			this->duration_ms = -1;
 			this->pending_callback = FALSE;
 			this->callback(this->duration_ms);
 		}
+		// otherwise init pending callback for single press
 		else
 		{
 			__disable_irq();
@@ -175,24 +188,49 @@ static void _BUTTON_key_press(BUTTON * this )
 			__enable_irq();
 		}
 
+		// change state to cooldown
 		this->state = COOLDOWN;
-
-		// if(this->callback != NULL)
-		// {
-		// 	this->callback(this->duration_ms);
-		// };
 	}
 }
 
 static void _BUTTON_key_cooldown(BUTTON * this)
 {
 	__disable_irq();
-	if(tp.delta(this->tp_released, tp_global, ms) >= DEBOUNCE_MIN_MS)
+	// check whether cooldown duration has passed to change states
+	if(tp.delta(this->tp_released, tp_global, ms) >= DEBOUNCE_DUR_MS)
 	{
 		this->state = KEY_UP;
 	}
 	__enable_irq();
 }
+
+static void _BUTTON_init_hardware(BUTTON * this)
+/****************************************************************************
+*   Input    : input this Button and Parameter
+*   Function : Setup Hardware
+****************************************************************************/
+{
+	// Enable GPIO F Register
+	SYSCTL_RCGCGPIO_R	|= SYSCTL_RCGC2_GPIOF;
+
+	asm volatile
+	(
+		"nop;"
+		"nop;"
+		"nop;"
+	);
+
+	// PORTF Direction for Button
+	GPIO_PORTF_DIR_R	&= ~(1 << BUTTON_BIT);
+
+	// PORF Pull UP - Active Low
+	GPIO_PORTF_PUR_R	|= (1 << BUTTON_BIT);
+
+	// PortF Digital enable
+	GPIO_PORTF_DEN_R	|= (1 << BUTTON_BIT);
+}
+
+/***************************   Class Functions   ***************************/
 
 static void BUTTON_set_callback(BUTTON * this, void(*callback)(INT32S duration_ms))
 /****************************************************************************
@@ -203,6 +241,7 @@ static void BUTTON_set_callback(BUTTON * this, void(*callback)(INT32S duration_m
 	this->callback = callback;
 }
 
+/***********************   Constructive Functions   ************************/
 
 static BUTTON* BUTTON_new(BUTTON_NAME SW)
 /****************************************************************************
@@ -216,6 +255,7 @@ static BUTTON* BUTTON_new(BUTTON_NAME SW)
 	this->duration_ms			=   0;
 	this->state			      	=   KEY_UP;
 	this->button				=   SW;
+
 	this->tp_pressed			=   NULL;
 	this->tp_released			=	NULL;
 	this->tp_db					=   NULL;
@@ -242,62 +282,15 @@ static void BUTTON_del(BUTTON * this)
 ****************************************************************************/
 {
 	tp.del(this->tp_pressed);
+	tp.del(this->tp_released);
 	tp.del(this->tp_db);
+	tp.del(this->tp_pending);
 
 	free(this);
-};
+}
 
-static void _BUTTON_init_hardware(BUTTON * this)
-/****************************************************************************
-*   Input    : input this Button and Parameter
-*   Function : Setup Hardware
-****************************************************************************/
-{
-	// Enable GPIO F Register
-	SYSCTL_RCGCGPIO_R           |=  SYSCTL_RCGC2_GPIOF;
+/****************************   Class Struct   *****************************/
 
-	asm volatile(
-				" nop;"
-				" nop;"
-				" nop;"
-			);
-
-	// PORTF Direction for Button
-	GPIO_PORTF_DIR_R            &=  ~(1 << BUTTON_BIT);
-
-	// PORF Pull UP - Active Low
-	GPIO_PORTF_PUR_R            |=  (1 << BUTTON_BIT);
-
-	// PortF Digital enable
-	GPIO_PORTF_DEN_R            |=  (1 << BUTTON_BIT);
-
-	// 0 = Edge, 1 = Level - Interrupt Sense
-	// GPIO_PORTF_IS_R    &=  (0 << SW); unused
-
-	// 0 = No, 1 = Yes - Interrupt Both Edges
-	// GPIO_PORTF_IBE_R   &=  (0 << SW1); unused
-
-	// 0 = Falling, 1 = Rising - Interrupt Event
-	// GPIO_PORTF_IEV_R   |=  (1 << SW1); unused
-
-	// 0 = Masked , 1 = Enabled - Interrupt mask
-	// GPIO_PORTF_IM_R    |=  (1 << SW1); unused
-
-	// 0 = Masked , 1 = Enabled - Interrupt control register
-	// GPIO_PORTF_ICR_R   |=  (1 << SW1);
-
-	// Clear pending interrupt.
-	// NVIC_UNPEND0_R |= (1 << SW1_INT);
-
-	// Set Priority leave it to default.
-	// NVIC_PRI7_R &= (0 << 23 | 1 << 22 | 1 << 21);
-
-	// Enable interrupt on PORTF
-	// NVIC_EN0_R |= (1 << SW1_INT); //Enable interrupt
-};
-/****************************************************************************
-*   Function : Struct BTN
-****************************************************************************/
 struct BUTTON_CLASS btn =
 {
 	.new                            = &BUTTON_new,
@@ -306,6 +299,5 @@ struct BUTTON_CLASS btn =
 	.controller                     = &BUTTON_controller,
 	.set_callback                   = &BUTTON_set_callback
 };
-
 
 /****************************** End Of Module *******************************/
