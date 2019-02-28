@@ -2,9 +2,9 @@
 * University of Southern Denmark
 * Embedded Programming (EMP)
 *
-* MODULENAME.: LED.h
+* MODULENAME.: led.h
 *
-* PROJECT....: EMP
+* PROJECT....: emp-blinker
 
 * DESCRIPTION: Interface to a LED struct.
 *
@@ -13,7 +13,7 @@
 * Date    Id    Change
 * YYMMDD
 * --------------------
-* 050128  KA    Module created.
+* 270220  PN    Module created.
 *
 ****************************************************************************/
 
@@ -44,18 +44,17 @@ typedef enum    LED_TYPE LED_TYPE;
 
 extern const struct LED_CLASS
 {
-	LED *		(* new)(void);
-	void   		(* del)(LED*);
-	void   		(* init)(void);
+	LED*		(*new)(void);
+	void   		(*del)(LED*);
 
-	void   		(* set_state)(LED * this, BOOLEAN state);
-	BOOLEAN 	(* get_state)(LED * this);
-	void   		(* set_color)(LED * this, RGB);
-	RGB    		(* get_color)(LED * this);
-	void   		(* set_callback)(LED *, void (* callback)(void));
+	void   		(*set_callback)(LED*, void (*callback)(void));
+	void   		(*set_state)(LED* this, BOOLEAN state);
+	BOOLEAN 	(*get_state)(LED* this);
+	void   		(*set_color)(LED* this, RGB);
+	RGB    		(*get_color)(LED* this);
 
-	void 		(* toggle)(LED * this);
-	void 		(* invert_colors)(LED * this);
+	void 		(*toggle)(LED* this);
+	void 		(*invert_colors)(LED* this);
 } led;
 
 /*****************************    Constructs   *****************************/
