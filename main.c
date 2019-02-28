@@ -9,6 +9,7 @@
 #include "src/button.h"
 #include "src/timepoint.h"
 #include "src/LED.h"
+#include "src/LED_controller.h"
 
 /*****************************    Defines    *******************************/
 
@@ -20,7 +21,7 @@
 
 TIMEPOINT * tp_global;
 LED * led_1;
-
+LED_CONTROLLER * ledc;
 
 /************************   Interrupt Handlers   ***************************/
 
@@ -47,6 +48,11 @@ void mofo_dannyboy(INT32S duration_ms)
 	__disable_irq();
 }
 
+void mofo_pattyboy(INT32S duration_ms)
+{
+	led_ctrl.callback(ledc, duration_ms);
+}
+
 /*******************************   Main   **********************************/
 int main(void)
 {
@@ -65,23 +71,19 @@ int main(void)
     led.set_color(led_1, (RGB){1, 0, 0});
     led.set_state(led_1, 1);
 
-    // create button SW1
-    BUTTON * btn_sw1 = btn.new(SW1);
-    btn.set_callback(btn_sw1, &mofo_dannyboy);
-
     led.set_color(led_1, (RGB){0, 1, 0});
+
+    // LED controller
+    ledc = led_ctrl.new();
+
+    // create button SW1
+	BUTTON * btn_sw1 = btn.new(SW1);
+	btn.set_callback(btn_sw1, mofo_pattyboy);
 
     for(;;)
     {
     	btn.controller(btn_sw1);
+    	led_ctrl.controller(ledc, led_1);
     }
 
-
-    // init local timepoint instance
-    //TIMEPOINT * tp_local = tp.new(NORMAL);
-    //tp.set_value(tp_local, (INT64U[]){200, 0, 0, 2});
-
-    // Test
-    //int diff = tp.delta(tp_local, tp_global, ms);
-    //printf("Test gives: %u.", diff);
 }
