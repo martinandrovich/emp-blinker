@@ -87,7 +87,7 @@ static void LED_CONTROLLER_callback(LED_CONTROLLER * this, INT32S duration_ms)
             break;
         // ^-- change mode if double click -- toggle -- does not change anything
         default:
-            this->mode_controller = (this->reference_ms >= duration_ms) ? MANUAL : AUTO;
+            this->mode_controller = (this->reference_ms > duration_ms) ? MANUAL : AUTO;
             // if normal mode change
             if(this->mode_controller == MANUAL)
             {
