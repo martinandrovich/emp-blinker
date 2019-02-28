@@ -22,7 +22,7 @@
 static LED_CONTROLLER * LED_CONTROLLER_new(void);
 static void LED_CONTROLLER_del(LED_CONTROLLER * this);
 
-static void LED_CONTROLLER_set_callback(LED_CONTROLLER * this, INT32S duration_ms);
+static void LED_CONTROLLER_callback(LED_CONTROLLER * this, INT32S duration_ms);
 static void LED_CONTROLLER_controller(LED_CONTROLLER * this, LED * led_obj);
 static void _LED_CONTROLLER_circulation(LED_CONTROLLER * this);
 
@@ -74,7 +74,7 @@ static void LED_CONTROLLER_del(LED_CONTROLLER * this)
     free(this);
 }
 
-static void LED_CONTROLLER_set_callback(LED_CONTROLLER * this, INT32S duration_ms)
+static void LED_CONTROLLER_callback(LED_CONTROLLER * this, INT32S duration_ms)
 /****************************************************************************
 *   Input    : Duration
 *   Function : LED controller, chooses state
@@ -87,7 +87,7 @@ static void LED_CONTROLLER_set_callback(LED_CONTROLLER * this, INT32S duration_m
             break;
         // ^-- change mode if double click -- toggle -- does not change anything
         default:
-            this->mode_controller = (this->reference_ms >= duration_ms) ? AUTO : MANUAL;
+            this->mode_controller = (this->reference_ms >= duration_ms) ? MANUAL : AUTO;
             // if normal mode change
             if(this->mode_controller == MANUAL)
             {
@@ -115,12 +115,12 @@ static void _LED_CONTROLLER_circulation(LED_CONTROLLER * this)
     if(this->mode_direction == UP)
     {
         alias_state += 1;
-        this->state_led = (this->state_led == MAXLED) ? 0 : alias_state;
+        this->state_led = (this->state_led == MAXLED) ? MINLED : alias_state;
     }
     else
     {
         alias_state -= 1;
-        this->state_led = (this->state_led == MINLED) ? 7 : alias_state;
+        this->state_led = (this->state_led == MINLED) ? MAXLED : alias_state;
     }
 }
 
@@ -140,8 +140,8 @@ static void LED_CONTROLLER_controller(LED_CONTROLLER * this, LED * led_obj)
             };
         __enable_irq();
     }
-    
-    led.set_color(led_obj, (RGB){(this->state_led & BITTHREE),(this->state_led & BITTWO),(this->state_led & BITONE)});
+
+    led.set_color(led_obj, (RGB){(((this->state_led) >> 2) & 1), (((this->state_led) >> 0) & 1), (((this->state_led) >> 1) & 1)});
 
 }
 
@@ -191,7 +191,7 @@ struct LED_CONTROLLER_CLASS led_ctrl =
     .del                =   &LED_CONTROLLER_del,
 
     .controller         =   &LED_CONTROLLER_controller,
-    .set_callback       =   &LED_CONTROLLER_set_callback,
+    .callback           =   &LED_CONTROLLER_callback,
     .set_mode           =   &LED_CONTROLLER_set_mode,
     .get_mode           =   &LED_CONTROLLER_get_mode,
     .set_reference_ms   =   &LED_CONTROLLER_set_reference_ms,

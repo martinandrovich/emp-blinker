@@ -47,7 +47,7 @@ extern struct LED_CONTROLLER_CLASS
     void  (* const del)(LED_CONTROLLER * this);
 
     void  (* const controller)(LED_CONTROLLER * this, LED * led_obj);
-    void  (* const set_callback)(LED_CONTROLLER * this, INT32S duration_ms);
+    void  (* const callback)(LED_CONTROLLER * this, INT32S duration_ms);
 
     void  (* const set_mode)(LED_CONTROLLER * this, LED_CONTROLLER_MODE mode);
     LED_CONTROLLER_MODE  (* const get_mode)(LED_CONTROLLER * this);
