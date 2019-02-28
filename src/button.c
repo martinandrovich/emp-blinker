@@ -160,12 +160,17 @@ static void _BUTTON_key_press(BUTTON * this )
 *   Function : Method for m_handler_button, pick mode
 ****************************************************************************/
 {
+	// update duration since key got pressed down
+	__disable_irq();
+	INT32S temp_duration_ms  = (INT32S)tp.delta(this->tp_pressed, tp_global, ms);
+	__enable_irq();
+
 	// check if button has been released (pressed)
 	if(GPIO_PORTF_DATA_R & (1 << BUTTON_BIT))
 	{
 		// update duration
 		__disable_irq();
-		this->duration_ms  = (INT32S)tp.delta(this->tp_pressed, tp_global, ms);
+		this->duration_ms  = temp_duration_ms;
 		tp.copy(this->tp_released, tp_global);
 		__enable_irq();
 
@@ -191,13 +196,22 @@ static void _BUTTON_key_press(BUTTON * this )
 		// change state to cooldown
 		this->state = COOLDOWN;
 	}
+	else if (temp_duration_ms >= LONGPRESS_DUR_MS)
+	{
+		this->duration_ms  = temp_duration_ms;
+		this->callback(this->duration_ms);
+
+		// change state to cooldown
+		this->state = COOLDOWN;
+	}
 }
 
 static void _BUTTON_key_cooldown(BUTTON * this)
 {
 	__disable_irq();
-	// check whether cooldown duration has passed to change states
-	if(tp.delta(this->tp_released, tp_global, ms) >= DEBOUNCE_DUR_MS)
+	
+	// check whether cooldown duration has passed & button has been released
+	if((tp.delta(this->tp_released, tp_global, ms) >= DEBOUNCE_DUR_MS) && (GPIO_PORTF_DATA_R & (1 << BUTTON_BIT)))
 	{
 		this->state = KEY_UP;
 	}
