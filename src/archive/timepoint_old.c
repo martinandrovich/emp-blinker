@@ -32,20 +32,20 @@
 
 void 	TIMEPOINT_tick(TIMEPOINT * this);
 void 	TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)());
-void 	TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
-void 	TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit);
+void 	TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TP_UNIT unit);
+void 	TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TP_UNIT unit);
 void 	TIMEPOINT_set_value(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
-INT64U 	TIMEPOINT_get_value(TIMEPOINT * this, TIMEUNIT unit);
+INT64U 	TIMEPOINT_get_value(TIMEPOINT * this, TP_UNIT unit);
 
 void 	TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src);
-INT64U 	TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
+INT64U 	TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TP_UNIT unit);
 
 TIMEPOINT * new_TIMEPOINT(TP_TYPE type);
 void 		del_TIMEPOINT(TIMEPOINT * this);
 
 /*****************************   Functions   *******************************/
 
-void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TIMEUNIT unit)
+void TIMEPOINT_increment(TIMEPOINT * this, INT64U value, TP_UNIT unit)
 /****************************************************************************
 *   Input    : this = pointer to TIMEPOINT instance.
                value = ammount to increment (unit defined by index).
@@ -94,7 +94,7 @@ void TIMEPOINT_set_callback(TIMEPOINT * this, void(*callback)())
 	this->callback = callback;
 }
 
-void TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TIMEUNIT unit)
+void TIMEPOINT_set_systick(TIMEPOINT * this, INT64U duration, TP_UNIT unit)
 /****************************************************************************
 *   Input    : this: Pointer to TIMEPOINT instance.
 			   systick_dur_ns: Duration of systick tick in ns.
@@ -117,13 +117,13 @@ void TIMEPOINT_set_value(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE])
 	}
 }
 
-INT64U TIMEPOINT_get_value(TIMEPOINT * this, TIMEUNIT unit)
+INT64U TIMEPOINT_get_value(TIMEPOINT * this, TP_UNIT unit)
 /****************************************************************************
 *   Input    : this = Pointer to TIMEPOINT instance.
-			   unit = desired TIMEUNIT.
+			   unit = desired TP_UNIT.
 *   Output   : Unsigned long long integer.
 *   Function : Return the value of a TIMEPOINT instance given in
-			   unit defined by TIMEUNIT.
+			   unit defined by TP_UNIT.
 ****************************************************************************/
 {
 	INT64U sum_ns = this->time_array[0] +
@@ -145,7 +145,7 @@ void TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src)
 	}
 }
 
-INT64U TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit)
+INT64U TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TP_UNIT unit)
 /****************************************************************************
 *   Function : See module specification (.h-file).
 *****************************************************************************/

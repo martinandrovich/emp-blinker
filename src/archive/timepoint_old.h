@@ -27,7 +27,7 @@
 /*****************************    Defines    *******************************/
 
 typedef struct  TIMEPOINT TIMEPOINT;
-typedef enum    TIMEUNIT TIMEUNIT;
+typedef enum    TP_UNIT TP_UNIT;
 typedef enum    TP_TYPE TP_TYPE;
 
 // done instead of having to define e.g. void func(struct TIMEPOINT tp, )..
@@ -59,13 +59,13 @@ extern  void        TIMEPOINT_copy(TIMEPOINT * des, TIMEPOINT * src);
 *   Function : Copy time_array from 'src' TIMEPOINT to 'des' TIMEPOINT.
 ****************************************************************************/
 
-extern  INT64U      TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TIMEUNIT unit);
+extern  INT64U      TIMEPOINT_delta(TIMEPOINT * tp1, TIMEPOINT * tp2, TP_UNIT unit);
 /****************************************************************************
 *   Input    : tp1, tp2 = Pointers to TIMEPOINT instances.
-               unit = TIMEUNIT to be used.
+               unit = TP_UNIT to be used.
 *   Output   : Unsigned long long integer.
 *   Function : Calculate absolute delta duration between two TIMEPOINTs
-               given in unit defined by TIMEUNIT.
+               given in unit defined by TP_UNIT.
 ****************************************************************************/
 
 /*****************************    Constructs   *****************************/
@@ -76,7 +76,7 @@ enum TP_TYPE
     SYSTEM
 };
 
-enum TIMEUNIT
+enum TP_UNIT
 {
     ns,     // 0 = nanoseconds
     us,     // 1 = microseconds
@@ -96,9 +96,9 @@ struct TIMEPOINT
     /** Methods ************************************************************/
     void    (*tick)(TIMEPOINT * this);
     void    (*set_callback)(TIMEPOINT * this, void(*callback)());
-    void    (*set_systick)(TIMEPOINT * this, INT64U duration, TIMEUNIT unit);
+    void    (*set_systick)(TIMEPOINT * this, INT64U duration, TP_UNIT unit);
 	void    (*set_value)(TIMEPOINT * this, INT64U time_array[TIME_ARRAY_SIZE]);
-    INT64U  (*get_value)(TIMEPOINT * this, TIMEUNIT unit);
+    INT64U  (*get_value)(TIMEPOINT * this, TP_UNIT unit);
 };
 
 /****************************** End Of Module ******************************/
