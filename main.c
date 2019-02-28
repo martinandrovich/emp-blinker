@@ -79,6 +79,11 @@ int main(void)
 		}
 	));
 
+    // debugable test callback
+    // void sw_1_callback (INT32S duration_ms){ printf("Trigger!"); }
+    // btn.set_callback(btn_sw1, sw_1_callback);
+
+
 	/****************************    Main Loop      *************************/
 
     for(;;)
