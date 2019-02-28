@@ -24,21 +24,22 @@
 #include <stdlib.h>
 
 #include "tm4c123gh6pm.h"
-#include "emp_type.h"
-#include "timepoint.h"
 #include "driver.h"
+
+#include "emp_type.h"
+#include "tp.h"
 
 /*****************************    Defines    *******************************/
 
 typedef struct BUTTON BUTTON;
-typedef enum   BUTTON_NAME BUTTON_NAME;
-typedef enum   KEYSTATE KEYSTATE;
+typedef enum   BTN_NAME BTN_NAME;
+typedef enum   BTN_STATE BTN_STATE;
 
 /*****************************   Constants   *******************************/
 
 /********************** External declaration of Variables ******************/
 
-extern TIMEPOINT * tp_global;
+extern TIMEPOINT* tp_global;
 
 /*****************************   Functions   *******************************/
 
@@ -47,18 +48,18 @@ extern TIMEPOINT * tp_global;
 extern struct BUTTON_CLASS
 {
 	// Constructor & Destructor
-	BUTTON*	(* const new)(BUTTON_NAME SW);
-	void    (* const del)(BUTTON * this);
+	BUTTON*	(*const new)(BTN_NAME SW);
+	void    (*const del)(BUTTON* this);
 
-	/** Methods ************************************************************/
-	void (* const controller)(BUTTON * this);
-	void (* const set_callback)(BUTTON * this, void(*callback)(INT32S duration_ms));
+	// Methods
+	void 	(*const controller)(BUTTON* this);
+	void 	(*const set_callback)(BUTTON* this, void(*callback)(INT32S duration_ms));
 
 } btn;
 
 /*****************************    Constructs   *****************************/
 
-enum KEYSTATE
+enum BTN_STATE
 {
    KEY_UP        =  0,
    DEBOUNCING    =  1,
@@ -66,7 +67,7 @@ enum KEYSTATE
    COOLDOWN		 =  3
 };
 
-enum BUTTON_NAME
+enum BTN_NAME
 {
    SW2           =  0,
    SW1           =  4
@@ -74,19 +75,20 @@ enum BUTTON_NAME
 
 struct BUTTON
 {
-	/** Members ************************************************************/
-	ENUM KEYSTATE state;
-	TIMEPOINT * tp_pressed;
-	TIMEPOINT * tp_released;
-	TIMEPOINT * tp_db;
-	TIMEPOINT * tp_pending;
-	INT32S duration_ms;
-	INT32S db_delta_ms;
-	BUTTON_NAME button;
+	BTN_NAME		button;
+	BTN_STATE 		state;
 
-	BOOLEAN pending_callback;
+	TIMEPOINT*		tp_pressed;
+	TIMEPOINT*		tp_released;
+	TIMEPOINT*		tp_db;
+	TIMEPOINT*		tp_pending;
 
-	void (* callback)(INT32S duration_ms);
+	INT32S			duration_ms;
+	INT32S			db_delta_ms;
+
+	BOOLEAN			pending_callback;
+
+	void 			(*callback)(INT32S duration_ms);
 };
 
 /****************************** End Of Module ******************************/
