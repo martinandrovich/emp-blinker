@@ -23,7 +23,7 @@
 
 #include <stdlib.h>
 
-#include "tm4c123gh6pm.h"
+#include "../tm4c123gh6pm.h"
 #include "driver.h"
 
 #include "emp_type.h"
