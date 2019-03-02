@@ -70,8 +70,9 @@ static LED* LED_new(void)
 {
 	LED* this = malloc(sizeof(LED));
 
-	this->state = 0;
-	this->color = (RGB){ 0, 0, 0 };
+	this->state 	= 0;
+	this->color 	= (RGB){ 0, 0, 0 };
+	this->callback 	= NULL;
 
 	_LED_init();
 
