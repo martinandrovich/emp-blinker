@@ -1,5 +1,6 @@
 /***************************** Include files *******************************/
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -21,7 +22,7 @@
 
 /*****************************   Variables   *******************************/
 
-TIMEPOINT * tp_global;
+TIMEPOINT* tp_global;
 
 /************************   Interrupt Handlers   ***************************/
 
@@ -48,7 +49,7 @@ int main(void)
 	sys_tick_init(SYSTICK_DUR_MS);
 
 	// init LED instance
-	LED * led_1 = led.new();
+	LED* led_1 = led.new();
 
 	led.set_color(led_1, (RGB){1, 0, 0});
 	led.set_state(led_1, 1);
@@ -57,7 +58,7 @@ int main(void)
 	LED_CONTROLLER* ledc_1 = ledctrl.new();
 
 	// init BUTTON instance (SW1)
-	BUTTON * btn_sw1 = btn.new(SW1);
+	BUTTON* btn_sw1 = btn.new(SW1);
 
 	// init callbacks (lambdas)
 
@@ -83,7 +84,6 @@ int main(void)
 	// debugable test callback
 	// void sw_1_callback (INT32S duration_ms){ printf("Trigger!"); }
 	// btn.set_callback(btn_sw1, sw_1_callback);
-
 
 	/****************************    Main Loop      *************************/
 
